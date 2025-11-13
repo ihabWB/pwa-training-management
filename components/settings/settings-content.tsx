@@ -246,11 +246,11 @@ export default function SettingsContent({
                   <Input
                     value={
                       locale === 'ar'
-                        ? {
+                        ? ({
                             admin: 'مدير',
                             supervisor: 'مشرف',
                             trainee: 'متدرب',
-                          }[user.role] || user.role
+                          } as Record<string, string>)[user.role] || user.role
                         : user.role
                     }
                     disabled
