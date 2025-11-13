@@ -1,7 +1,24 @@
 import { redirect } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import DashboardLayout from '@/components/layout/dashboard-layout';
-import TraineesTable from '@/components/trainees/trainees-table';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+
+// Lazy load the heavy table component
+const TraineesTable = dynamic(() => import('@/components/trainees/trainees-table'), {
+  loading: () => (
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="space-y-4">
+        <div className="h-10 w-full bg-gray-200 rounded animate-pulse" />
+        {[...Array(8)].map((_, i) => (
+          <div key={i} className="h-16 bg-gray-100 rounded animate-pulse" />
+        ))}
+      </div>
+    </div>
+  ),
+});
+
+// إعادة التحقق من البيانات كل 60 ثانية
+export const revalidate = 60;
 
 export default async function TraineesPage({ params }: { params: { locale: string } }) {
   const supabase = await createServerSupabaseClient();

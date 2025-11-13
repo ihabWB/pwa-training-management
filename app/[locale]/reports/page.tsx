@@ -1,8 +1,25 @@
 import { redirect } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import DashboardLayout from '@/components/layout/dashboard-layout';
-import ReportsTable from '@/components/reports/reports-table';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { FileText, CheckCircle, Clock, XCircle } from 'lucide-react';
+
+// Lazy load the table component
+const ReportsTable = dynamic(() => import('@/components/reports/reports-table'), {
+  loading: () => (
+    <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="space-y-4">
+        <div className="h-10 w-full bg-gray-200 rounded animate-pulse" />
+        {[...Array(8)].map((_, i) => (
+          <div key={i} className="h-16 bg-gray-100 rounded animate-pulse" />
+        ))}
+      </div>
+    </div>
+  ),
+});
+
+// إعادة التحقق من البيانات كل 30 ثانية (التقارير تتغير بسرعة)
+export const revalidate = 30;
 
 export default async function ReportsPage({
   params,

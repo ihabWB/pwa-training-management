@@ -136,6 +136,7 @@ export default function Sidebar({
                 width={50} 
                 height={50}
                 className="rounded-lg"
+                priority
               />
             </div>
             {!isCollapsed && (

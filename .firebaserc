@@ -1,0 +1,10 @@
+# Firebase
+.firebase/
+.firebaserc
+firebase-debug.log
+firebaserc
+
+# Build output
+out/
+.next/
+build/

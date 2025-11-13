@@ -1,10 +1,50 @@
 import { redirect } from 'next/navigation';
+import dynamic from 'next/dynamic';
+import { Metadata } from 'next';
 import DashboardLayout from '@/components/layout/dashboard-layout';
 import StatCard from '@/components/dashboard/stat-card';
-import RecentActivity from '@/components/dashboard/recent-activity';
-import UpcomingTasks from '@/components/dashboard/upcoming-tasks';
 import { Users, Building2, UserCheck, FileText, ListTodo, TrendingUp } from 'lucide-react';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  return {
+    title: locale === 'ar' ? 'لوحة التحكم - سلطة المياه الفلسطينية' : 'Dashboard - Palestinian Water Authority',
+    description: locale === 'ar' 
+      ? 'لوحة التحكم الرئيسية لنظام متابعة برنامج التدريب' 
+      : 'Main dashboard for the training program monitoring system',
+  };
+}
+
+// Lazy load heavy components
+const RecentActivity = dynamic(() => import('@/components/dashboard/recent-activity'), {
+  loading: () => (
+    <div className="bg-white p-6 rounded-lg border border-gray-200">
+      <div className="h-6 w-32 bg-gray-200 rounded animate-pulse mb-4" />
+      <div className="space-y-3">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="h-16 bg-gray-100 rounded animate-pulse" />
+        ))}
+      </div>
+    </div>
+  ),
+});
+
+const UpcomingTasks = dynamic(() => import('@/components/dashboard/upcoming-tasks'), {
+  loading: () => (
+    <div className="bg-white p-6 rounded-lg border border-gray-200">
+      <div className="h-6 w-32 bg-gray-200 rounded animate-pulse mb-4" />
+      <div className="space-y-3">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="h-16 bg-gray-100 rounded animate-pulse" />
+        ))}
+      </div>
+    </div>
+  ),
+});
+
+// إعادة التحقق من البيانات كل 30 ثانية
+export const revalidate = 30;
 
 export default async function DashboardPage({ 
   params 
@@ -37,7 +77,7 @@ export default async function DashboardPage({
     redirect(`/${locale}/trainee/dashboard`);
   }
 
-  // Fetch dashboard statistics
+  // Fetch dashboard statistics and data in parallel
   const [
     { count: totalTrainees },
     { count: activeTrainees },
@@ -45,6 +85,8 @@ export default async function DashboardPage({
     { count: totalSupervisors },
     { count: pendingReports },
     { count: pendingTasks },
+    { data: recentReportsData },
+    { data: upcomingTasksData },
   ] = await Promise.all([
     supabase.from('trainees').select('*', { count: 'exact', head: true }),
     supabase.from('trainees').select('*', { count: 'exact', head: true }).eq('status', 'active'),
@@ -52,47 +94,51 @@ export default async function DashboardPage({
     supabase.from('supervisors').select('*', { count: 'exact', head: true }),
     supabase.from('reports').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+    // Fetch recent reports with trainee info
+    supabase
+      .from('reports')
+      .select(`
+        id,
+        title,
+        status,
+        created_at,
+        trainees!inner (
+          users!inner (
+            full_name
+          )
+        )
+      `)
+      .order('created_at', { ascending: false })
+      .limit(5),
+    // Fetch upcoming tasks
+    supabase
+      .from('tasks')
+      .select('id, title, due_date, priority, status, assigned_to')
+      .eq('status', 'pending')
+      .gte('due_date', new Date().toISOString().split('T')[0])
+      .order('due_date', { ascending: true })
+      .limit(5),
   ]);
 
-  // Fetch recent activities (simplified for now)
-  const recentActivities = [
-    {
-      id: '1',
-      user: 'أحمد محمد',
-      action: 'رفع',
-      entity: 'تقرير أسبوعي',
-      timestamp: new Date().toISOString(),
-      status: 'pending',
-    },
-    {
-      id: '2',
-      user: 'سارة علي',
-      action: 'أكملت',
-      entity: 'مهمة تدريبية',
-      timestamp: new Date(Date.now() - 3600000).toISOString(),
-      status: 'approved',
-    },
-  ];
+  // Transform recent reports into activities
+  const recentActivities = (recentReportsData || []).map((report: any) => ({
+    id: report.id,
+    user: report.trainees?.users?.full_name || 'غير معروف',
+    action: locale === 'ar' ? 'رفع' : 'Uploaded',
+    entity: report.title,
+    timestamp: report.created_at,
+    status: report.status,
+  }));
 
-  // Fetch upcoming tasks (simplified for now)
-  const upcomingTasks = [
-    {
-      id: '1',
-      title: 'إعداد تقرير شهري عن التقدم',
-      dueDate: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0],
-      priority: 'high' as const,
-      assignedTo: 'جميع المتدربين',
-      status: 'pending',
-    },
-    {
-      id: '2',
-      title: 'حضور ورشة عمل تقنية',
-      dueDate: new Date(Date.now() + 86400000 * 5).toISOString().split('T')[0],
-      priority: 'medium' as const,
-      assignedTo: 'مجموعة A',
-      status: 'pending',
-    },
-  ];
+  // Transform tasks data
+  const upcomingTasks = (upcomingTasksData || []).map((task: any) => ({
+    id: task.id,
+    title: task.title,
+    dueDate: task.due_date,
+    priority: task.priority as 'high' | 'medium' | 'low',
+    assignedTo: task.assigned_to || (locale === 'ar' ? 'جميع المتدربين' : 'All Trainees'),
+    status: task.status,
+  }));
 
   return (
     <DashboardLayout
