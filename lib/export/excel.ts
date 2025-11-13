@@ -40,12 +40,12 @@ export const exportTraineesToExcel = (trainees: any[], locale: string) => {
     ).toLocaleDateString(),
     [locale === 'ar' ? 'الحالة' : 'Status']:
       locale === 'ar'
-        ? {
+        ? ({
             active: 'نشط',
             completed: 'مكتمل',
             suspended: 'موقوف',
             withdrawn: 'منسحب',
-          }[trainee.status]
+          } as Record<string, string>)[trainee.status] || trainee.status
         : trainee.status,
   }));
 
@@ -104,11 +104,11 @@ export const exportReportsToExcel = (reports: any[], locale: string) => {
     ).toLocaleDateString(),
     [locale === 'ar' ? 'الحالة' : 'Status']:
       locale === 'ar'
-        ? {
+        ? ({
             pending: 'قيد المراجعة',
             approved: 'موافق عليه',
             rejected: 'مرفوض',
-          }[report.status]
+          } as Record<string, string>)[report.status] || report.status
         : report.status,
     [locale === 'ar' ? 'التعليقات' : 'Feedback']: report.feedback || '-',
   }));
