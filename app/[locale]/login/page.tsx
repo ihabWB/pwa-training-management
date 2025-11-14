@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { signIn } from '@/lib/supabase/auth';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 export default function LoginPage() {
   const t = useTranslations('common');
   const router = useRouter();
+  const params = useParams();
+  const locale = params.locale as string || 'ar';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -23,7 +25,7 @@ export default function LoginPage() {
 
     try {
       await signIn(email, password);
-      router.push('/dashboard');
+      router.push(`/${locale}/dashboard`);
     } catch (err: any) {
       setError(err.message || 'فشل تسجيل الدخول');
     } finally {
