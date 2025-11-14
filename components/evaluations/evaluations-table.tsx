@@ -75,6 +75,18 @@ export default function EvaluationsTable({
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedTraineeId, setSelectedTraineeId] = useState<string>('');
 
+  // Debug logging
+  const selectedTrainee = selectedTraineeId 
+    ? assignedTrainees.find(t => t.id === selectedTraineeId)
+    : null;
+  
+  console.log('EvaluationsTable Debug:', {
+    selectedTraineeId,
+    selectedTraineeName: selectedTrainee?.user?.full_name,
+    assignedTraineesCount: assignedTrainees.length,
+    firstTrainee: assignedTrainees[0]?.user?.full_name
+  });
+
   const t = {
     ar: {
       search: 'بحث عن تقييم...',

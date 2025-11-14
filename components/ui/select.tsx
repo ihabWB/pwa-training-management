@@ -24,14 +24,16 @@ function Select({ value, onValueChange, defaultLabel, children }: SelectProps) {
   const [selectedLabel, setSelectedLabel] = React.useState(defaultLabel || '');
   const [isOpen, setIsOpen] = React.useState(false);
   
+  // Debug logging
+  React.useEffect(() => {
+    console.log('Select Debug:', { value, defaultLabel, selectedLabel });
+  }, [value, defaultLabel, selectedLabel]);
+  
   // Update selectedLabel when defaultLabel changes
   React.useEffect(() => {
-    if (defaultLabel) {
-      setSelectedLabel(defaultLabel);
-    } else if (!value) {
-      setSelectedLabel('');
-    }
-  }, [value, defaultLabel]);
+    // Always update if defaultLabel is provided
+    setSelectedLabel(defaultLabel || '');
+  }, [defaultLabel]);
   
   return (
     <SelectContext.Provider value={{ 
