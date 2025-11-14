@@ -95,6 +95,12 @@ export default async function EvaluationsPage({
     console.error('Error fetching evaluations:', evaluationsError);
   }
 
+  // Debug: Log evaluations data
+  console.log('📊 Evaluations Data:', evaluationsData);
+  console.log('📊 Total Count:', evaluationsData?.length || 0);
+  console.log('📊 First Evaluation Status:', evaluationsData?.[0]?.status);
+  console.log('📊 Error:', evaluationsError);
+
   // Transform evaluations data
   const evaluations = (evaluationsData || []).map((evaluation: any) => ({
     id: evaluation.id,
@@ -221,20 +227,44 @@ export default async function EvaluationsPage({
         </div>
 
         {/* Debug Info - معلومات التشخيص */}
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <h3 className="font-bold text-yellow-900 mb-2">🔍 معلومات التشخيص:</h3>
-          <div className="text-sm font-mono space-y-1 text-right">
-            <div>عدد التقييمات: {evaluations.length}</div>
-            <div>الدور: {userProfile.role}</div>
-            <div>أول تقييم - الحالة: <span className="font-bold text-red-600">{evaluationsData?.[0]?.status || 'غير موجود ❌'}</span></div>
-            <div>أول تقييم - ID: {evaluationsData?.[0]?.id || 'غير موجود'}</div>
-            {evaluationsData?.[0] && (
-              <details className="mt-2">
-                <summary className="cursor-pointer text-yellow-900 font-bold">عرض البيانات الكاملة</summary>
-                <pre className="mt-2 p-2 bg-white rounded text-xs overflow-auto max-h-60 text-left" dir="ltr">
-                  {JSON.stringify(evaluationsData[0], null, 2)}
-                </pre>
-              </details>
+        <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-6 mb-6">
+          <h3 className="font-bold text-yellow-900 mb-4 text-xl">🔍 معلومات التشخيص (Diagnostic Info)</h3>
+          <div className="bg-white rounded p-4 text-sm font-mono space-y-2 text-right">
+            <div className="border-b pb-2">
+              <strong>عدد التقييمات:</strong> {evaluations.length}
+            </div>
+            <div className="border-b pb-2">
+              <strong>دورك:</strong> {userProfile.role}
+            </div>
+            <div className="border-b pb-2">
+              <strong>هل يوجد تقييمات؟</strong> {evaluationsData && evaluationsData.length > 0 ? 'نعم ✅' : 'لا ❌'}
+            </div>
+            {evaluationsData && evaluationsData.length > 0 ? (
+              <>
+                <div className="border-b pb-2 bg-red-50 p-2 rounded">
+                  <strong className="text-red-700">حقل الحالة (status):</strong>{' '}
+                  <span className="font-bold text-lg">
+                    {evaluationsData[0]?.status !== undefined 
+                      ? `"${evaluationsData[0].status}" ✅` 
+                      : 'غير موجود في قاعدة البيانات ❌'}
+                  </span>
+                </div>
+                <div className="border-b pb-2">
+                  <strong>ID التقييم الأول:</strong> {evaluationsData[0]?.id}
+                </div>
+                <details className="mt-4">
+                  <summary className="cursor-pointer text-yellow-900 font-bold bg-yellow-100 p-2 rounded hover:bg-yellow-200">
+                    📋 عرض كل البيانات (Click to expand)
+                  </summary>
+                  <pre className="mt-2 p-3 bg-gray-100 rounded text-xs overflow-auto max-h-96 text-left border" dir="ltr">
+                    {JSON.stringify(evaluationsData[0], null, 2)}
+                  </pre>
+                </details>
+              </>
+            ) : (
+              <div className="text-center py-4 text-gray-600">
+                لا توجد تقييمات لعرضها
+              </div>
             )}
           </div>
         </div>
