@@ -74,14 +74,28 @@ export default async function SupervisorEvaluationsPage({
         .select('id, name_ar, name_en')
         .in('id', institutionIds);
 
-      // Combine the data
-      assignedTrainees = traineesData.map((trainee: any) => ({
-        id: trainee.id,
-        user_id: trainee.user_id,
-        institution_id: trainee.institution_id,
-        user: usersData?.find((u: any) => u.id === trainee.user_id),
-        institution: institutionsData?.find((i: any) => i.id === trainee.institution_id)
-      }));
+      // Combine the data - flatten for serialization
+      assignedTrainees = traineesData.map((trainee: any) => {
+        const user = usersData?.find((u: any) => u.id === trainee.user_id);
+        const institution = institutionsData?.find((i: any) => i.id === trainee.institution_id);
+        
+        return {
+          id: trainee.id,
+          user_id: trainee.user_id,
+          institution_id: trainee.institution_id,
+          user: user ? {
+            id: user.id,
+            full_name: user.full_name,
+            email: user.email,
+            avatar_url: user.avatar_url
+          } : null,
+          institution: institution ? {
+            id: institution.id,
+            name_ar: institution.name_ar,
+            name_en: institution.name_en
+          } : null
+        };
+      });
     }
   }
 
