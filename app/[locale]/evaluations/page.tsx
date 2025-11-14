@@ -92,17 +92,27 @@ export default async function EvaluationsPage({
         if (traineesData && traineesData.length > 0) {
           // Get user details
           const userIds = traineesData.map((t: any) => t.user_id).filter(Boolean);
-          const { data: usersData } = await supabase
+          console.log('SERVER - User IDs to fetch:', userIds);
+          
+          const { data: usersData, error: usersError } = await supabase
             .from('users')
             .select('id, full_name, email, avatar_url')
             .in('id', userIds);
+          
+          console.log('SERVER - Users Data:', usersData);
+          console.log('SERVER - Users Error:', usersError);
 
           // Get institution details
           const institutionIds = traineesData.map((t: any) => t.institution_id).filter(Boolean);
-          const { data: institutionsData } = await supabase
+          console.log('SERVER - Institution IDs to fetch:', institutionIds);
+          
+          const { data: institutionsData, error: institutionsError } = await supabase
             .from('institutions')
             .select('id, name_ar, name_en')
             .in('id', institutionIds);
+          
+          console.log('SERVER - Institutions Data:', institutionsData);
+          console.log('SERVER - Institutions Error:', institutionsError);
 
           // Combine the data - flatten for serialization
           assignedTrainees = traineesData.map((trainee: any) => {
