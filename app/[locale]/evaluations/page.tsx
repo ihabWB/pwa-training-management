@@ -72,23 +72,48 @@ export default async function EvaluationsPage({
       supervisorId = supervisorData.id;
       evaluationsQuery = evaluationsQuery.eq('supervisor_id', supervisorData.id);
       
-      // Get assigned trainees for supervisor
-      const { data: assignedTraineesData } = await supabase
+      // Get assigned trainees for supervisor - using separate queries
+      const { data: assignments } = await supabase
         .from('supervisor_trainee')
-        .select(`
-          trainee:trainees(
-            id,
-            user_id,
-            institution_id,
-            user:users(id, full_name, email, avatar_url),
-            institution:institutions(id, name_ar, name_en)
-          )
-        `)
+        .select('trainee_id')
         .eq('supervisor_id', supervisorData.id);
 
-      assignedTrainees = assignedTraineesData
-        ?.map((item: any) => item.trainee)
-        .filter((trainee: any) => trainee !== null) || [];
+      console.log('Assignments found:', assignments?.length || 0);
+
+      // Get trainee details separately
+      const traineeIds = (assignments || []).map((a: any) => a.trainee_id);
+      
+      if (traineeIds.length > 0) {
+        const { data: traineesData } = await supabase
+          .from('trainees')
+          .select('id, user_id, institution_id')
+          .in('id', traineeIds);
+
+        if (traineesData && traineesData.length > 0) {
+          // Get user details
+          const userIds = traineesData.map((t: any) => t.user_id).filter(Boolean);
+          const { data: usersData } = await supabase
+            .from('users')
+            .select('id, full_name, email, avatar_url')
+            .in('id', userIds);
+
+          // Get institution details
+          const institutionIds = traineesData.map((t: any) => t.institution_id).filter(Boolean);
+          const { data: institutionsData } = await supabase
+            .from('institutions')
+            .select('id, name_ar, name_en')
+            .in('id', institutionIds);
+
+          // Combine the data
+          assignedTrainees = traineesData.map((trainee: any) => ({
+            id: trainee.id,
+            user_id: trainee.user_id,
+            institution_id: trainee.institution_id,
+            user: usersData?.find((u: any) => u.id === trainee.user_id),
+            institution: institutionsData?.find((i: any) => i.id === trainee.institution_id)
+          }));
+        }
+      }
       
       console.log('Supervisor ID:', supervisorId);
       console.log('Assigned Trainees Count:', assignedTrainees.length);
