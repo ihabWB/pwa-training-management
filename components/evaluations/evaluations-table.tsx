@@ -1,8 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Award, Calendar, User } from 'lucide-react';
+import { Search, Award, Calendar, User, Plus } from 'lucide-react';
 import ViewEvaluationDialog from './view-evaluation-dialog';
+import AddEvaluationDialogEnhanced from './add-evaluation-dialog-enhanced';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 interface Evaluation {
   id: string;
@@ -27,19 +36,44 @@ interface Evaluation {
   created_at: string;
 }
 
+interface Trainee {
+  id: string;
+  user_id: string;
+  institution_id: string;
+  user: {
+    id: string;
+    full_name: string;
+    email: string;
+    avatar_url: string | null;
+  };
+  institution: {
+    id: string;
+    name_ar: string;
+    name_en: string;
+  };
+}
+
 interface EvaluationsTableProps {
   evaluations: Evaluation[];
   locale: string;
+  userRole?: string;
+  supervisorId?: string | null;
+  assignedTrainees?: Trainee[];
 }
 
 export default function EvaluationsTable({
   evaluations,
   locale,
+  userRole,
+  supervisorId,
+  assignedTrainees = [],
 }: EvaluationsTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [selectedEvaluation, setSelectedEvaluation] = useState<Evaluation | null>(null);
   const [showViewDialog, setShowViewDialog] = useState(false);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [selectedTraineeId, setSelectedTraineeId] = useState<string>('');
 
   const t = {
     ar: {
@@ -63,6 +97,9 @@ export default function EvaluationsTable({
       good: 'جيد',
       fair: 'مقبول',
       needsImprovement: 'يحتاج تحسين',
+      addEvaluation: 'إضافة تقييم',
+      selectTrainee: 'اختر المتدرب',
+      pleaseSelectTrainee: 'الرجاء اختيار متدرب أولاً',
     },
     en: {
       search: 'Search for evaluation...',
@@ -85,10 +122,21 @@ export default function EvaluationsTable({
       good: 'Good',
       fair: 'Fair',
       needsImprovement: 'Needs Improvement',
+      addEvaluation: 'Add Evaluation',
+      selectTrainee: 'Select Trainee',
+      pleaseSelectTrainee: 'Please select a trainee first',
     },
   };
 
   const text = t[locale as 'ar' | 'en'];
+
+  const handleAddEvaluation = () => {
+    if (!selectedTraineeId) {
+      alert(text.pleaseSelectTrainee);
+      return;
+    }
+    setIsAddDialogOpen(true);
+  };
 
   // Filter evaluations
   const filteredEvaluations = evaluations.filter((evaluation) => {
@@ -126,7 +174,43 @@ export default function EvaluationsTable({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow">
+    <div className="space-y-6">
+      {/* Add Evaluation Section - Only for Supervisors */}
+      {userRole === 'supervisor' && supervisorId && assignedTrainees.length > 0 && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <label className="text-sm font-medium mb-2 block">{text.selectTrainee}</label>
+              <Select value={selectedTraineeId} onValueChange={setSelectedTraineeId}>
+                <SelectTrigger>
+                  <SelectValue placeholder={text.selectTrainee} />
+                </SelectTrigger>
+                <SelectContent>
+                  {assignedTrainees.map((trainee) => (
+                    <SelectItem key={trainee.id} value={trainee.id}>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{trainee.user?.full_name}</span>
+                        <span className="text-sm text-muted-foreground">
+                          ({locale === 'ar' ? trainee.institution?.name_ar : trainee.institution?.name_en})
+                        </span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex items-end">
+              <Button onClick={handleAddEvaluation} className="w-full md:w-auto">
+                <Plus className="mr-2 h-4 w-4" />
+                {text.addEvaluation}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Evaluations Table */}
+      <div className="bg-white rounded-lg shadow">
       {/* Header */}
       <div className="p-6 border-b">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -257,6 +341,7 @@ export default function EvaluationsTable({
           </table>
         )}
       </div>
+      </div>
 
       {/* View Evaluation Dialog */}
       {showViewDialog && selectedEvaluation && (
@@ -270,6 +355,34 @@ export default function EvaluationsTable({
           locale={locale}
         />
       )}
+
+      {/* Add Evaluation Dialog */}
+      {selectedTraineeId && (() => {
+        const selectedTrainee = assignedTrainees.find(t => t.id === selectedTraineeId);
+        if (!selectedTrainee) return null;
+        
+        return (
+          <AddEvaluationDialogEnhanced
+            isOpen={isAddDialogOpen}
+            onClose={() => setIsAddDialogOpen(false)}
+            onSuccess={() => {
+              setIsAddDialogOpen(false);
+              window.location.reload();
+            }}
+            locale={locale}
+            trainee={{
+              id: selectedTrainee.id,
+              user_id: selectedTrainee.user_id,
+              full_name: selectedTrainee.user?.full_name || '',
+              email: selectedTrainee.user?.email || '',
+              institution_name: locale === 'ar' 
+                ? selectedTrainee.institution?.name_ar || ''
+                : selectedTrainee.institution?.name_en || '',
+            }}
+            supervisorId={supervisorId!}
+          />
+        );
+      })()}
     </div>
   );
 }

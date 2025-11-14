@@ -57,6 +57,9 @@ export default async function EvaluationsPage({
     )
     .order('evaluation_date', { ascending: false });
 
+  let supervisorId: string | null = null;
+  let assignedTrainees: any[] = [];
+
   // If supervisor, only show evaluations they created
   if (userProfile.role === 'supervisor') {
     const { data: supervisorData } = await supabase
@@ -66,13 +69,32 @@ export default async function EvaluationsPage({
       .single();
 
     if (supervisorData) {
+      supervisorId = supervisorData.id;
       evaluationsQuery = evaluationsQuery.eq('supervisor_id', supervisorData.id);
+      
+      // Get assigned trainees for supervisor
+      const { data: assignedTraineesData } = await supabase
+        .from('supervisor_trainee')
+        .select(`
+          trainee:trainees(
+            id,
+            user_id,
+            institution_id,
+            user:users(id, full_name, email, avatar_url),
+            institution:institutions(id, name_ar, name_en)
+          )
+        `)
+        .eq('supervisor_id', supervisorData.id);
+
+      assignedTrainees = assignedTraineesData
+        ?.map((item: any) => item.trainee)
+        .filter((trainee: any) => trainee !== null) || [];
     } else {
       evaluationsQuery = evaluationsQuery.eq('supervisor_id', 'none');
     }
   }
 
-  // If trainee, only show their own evaluations
+  // If trainee, only show their own evaluations (approved only)
   if (userProfile.role === 'trainee') {
     const { data: traineeData } = await supabase
       .from('trainees')
@@ -81,7 +103,9 @@ export default async function EvaluationsPage({
       .single();
 
     if (traineeData) {
-      evaluationsQuery = evaluationsQuery.eq('trainee_id', traineeData.id);
+      evaluationsQuery = evaluationsQuery
+        .eq('trainee_id', traineeData.id)
+        .eq('status', 'approved');
     } else {
       evaluationsQuery = evaluationsQuery.eq('trainee_id', 'none');
     }
@@ -219,7 +243,13 @@ export default async function EvaluationsPage({
         </div>
 
         {/* Evaluations Table */}
-        <EvaluationsTable evaluations={evaluations} locale={params.locale} />
+        <EvaluationsTable 
+          evaluations={evaluations} 
+          locale={params.locale}
+          userRole={userProfile.role}
+          supervisorId={supervisorId}
+          assignedTrainees={assignedTrainees}
+        />
       </div>
     </DashboardLayout>
   );
