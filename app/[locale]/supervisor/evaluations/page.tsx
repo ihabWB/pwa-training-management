@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
+import { createServerSupabaseClient } from '@/lib/supabase/server';
 import SupervisorEvaluationsList from '@/components/supervisor/supervisor-evaluations-list';
 
 export default async function SupervisorEvaluationsPage({
@@ -7,7 +7,7 @@ export default async function SupervisorEvaluationsPage({
 }: {
   params: { locale: string };
 }) {
-  const supabase = await createClient();
+  const supabase = await createServerSupabaseClient();
 
   const {
     data: { user },
@@ -45,7 +45,7 @@ export default async function SupervisorEvaluationsPage({
     .order('created_at', { ascending: false });
 
   // Get all trainees assigned to this supervisor
-  const { data: assignedTrainees } = await supabase
+  const { data: assignedTraineesData } = await supabase
     .from('supervisor_trainee')
     .select(`
       trainee:trainees(
@@ -57,6 +57,11 @@ export default async function SupervisorEvaluationsPage({
       )
     `)
     .eq('supervisor_id', supervisorData.id);
+
+  // Extract trainees from the nested structure and filter out nulls
+  const assignedTrainees = assignedTraineesData
+    ?.map((item: any) => item.trainee)
+    .filter((trainee: any) => trainee !== null) || [];
 
   const text =
     params.locale === 'ar'
@@ -199,7 +204,7 @@ export default async function SupervisorEvaluationsPage({
       {/* Evaluations List with Add Button */}
       <SupervisorEvaluationsList
         evaluations={evaluations || []}
-        assignedTrainees={assignedTrainees?.map((at) => at.trainee).filter(Boolean) || []}
+        assignedTrainees={assignedTrainees}
         supervisorId={supervisorData.id}
         locale={params.locale}
       />
