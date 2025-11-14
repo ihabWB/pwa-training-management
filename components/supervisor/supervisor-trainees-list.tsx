@@ -50,7 +50,7 @@ export default function SupervisorTraineesList({
     },
   };
 
-  const text = t[locale as 'ar' | 'en'];
+  const text = t[locale as keyof typeof t] || t.en;
 
   const getStatusColor = (status: string) => {
     switch (status) {

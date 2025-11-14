@@ -62,8 +62,12 @@ export default async function MyTraineesPage({
     .eq('supervisor_id', supervisor.id)
     .order('assigned_date', { ascending: false });
 
+  console.log('Supervisor ID:', supervisor.id);
+  console.log('Assignments found:', assignments?.length || 0);
+
   // Get trainee details separately
   const traineeIds = (assignments || []).map((a: any) => a.trainee_id);
+  console.log('Trainee IDs:', traineeIds);
   
   let trainees: any[] = [];
   
@@ -73,19 +77,29 @@ export default async function MyTraineesPage({
       .select('id, user_id, institution_id, status, university, major, start_date, expected_end_date')
       .in('id', traineeIds);
 
+    console.log('Trainees data found:', traineesData?.length || 0);
+
     // Get user details
     const userIds = (traineesData || []).map((t: any) => t.user_id);
+    console.log('User IDs:', userIds);
+    
     const { data: usersData } = await supabase
       .from('users')
       .select('id, full_name, email, phone_number')
       .in('id', userIds);
 
+    console.log('Users data found:', usersData?.length || 0);
+
     // Get institution details
     const institutionIds = (traineesData || []).map((t: any) => t.institution_id);
+    console.log('Institution IDs:', institutionIds);
+    
     const { data: institutionsData } = await supabase
       .from('institutions')
       .select('id, name, name_ar, location')
       .in('id', institutionIds);
+
+    console.log('Institutions data found:', institutionsData?.length || 0);
 
     // Combine all data
     trainees = (traineesData || []).map((trainee: any) => {
@@ -101,6 +115,9 @@ export default async function MyTraineesPage({
         assigned_date: assignment?.assigned_date,
       };
     }).filter((t: any) => t.user && t.institution); // Only include trainees with complete data
+    
+    console.log('Final trainees count:', trainees.length);
+    console.log('Trainees:', JSON.stringify(trainees, null, 2));
   }
 
   return (
