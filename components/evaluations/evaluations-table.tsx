@@ -1,17 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Award, Calendar, User, Plus } from 'lucide-react';
+import { Search, Award, Calendar, User } from 'lucide-react';
 import ViewEvaluationDialog from './view-evaluation-dialog';
-import AddEvaluationDialogEnhanced from './add-evaluation-dialog-enhanced';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
 
 interface Evaluation {
   id: string;
@@ -36,64 +27,19 @@ interface Evaluation {
   created_at: string;
 }
 
-interface Trainee {
-  id: string;
-  user_id: string;
-  institution_id: string;
-  user: {
-    id: string;
-    full_name: string;
-    email: string;
-    avatar_url: string | null;
-  };
-  institution: {
-    id: string;
-    name_ar: string;
-    name_en: string;
-  };
-}
-
 interface EvaluationsTableProps {
   evaluations: Evaluation[];
   locale: string;
-  userRole?: string;
-  supervisorId?: string | null;
-  assignedTrainees?: Trainee[];
 }
 
 export default function EvaluationsTable({
   evaluations,
   locale,
-  userRole,
-  supervisorId,
-  assignedTrainees = [],
 }: EvaluationsTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [selectedEvaluation, setSelectedEvaluation] = useState<Evaluation | null>(null);
   const [showViewDialog, setShowViewDialog] = useState(false);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [selectedTraineeId, setSelectedTraineeId] = useState<string>('');
-
-  // Debug logging
-  const selectedTrainee = selectedTraineeId 
-    ? assignedTrainees.find(t => t.id === selectedTraineeId)
-    : null;
-  
-  console.log('EvaluationsTable Debug:', {
-    selectedTraineeId,
-    selectedTraineeName: selectedTrainee?.user?.full_name,
-    assignedTraineesCount: assignedTrainees.length,
-    firstTrainee: assignedTrainees[0]?.user?.full_name,
-    firstTraineeFullObject: assignedTrainees[0],
-    allTrainees: assignedTrainees.map(t => ({
-      id: t.id,
-      hasUser: !!t.user,
-      userName: t.user?.full_name,
-      hasInstitution: !!t.institution,
-      institutionName: t.institution?.name_ar
-    }))
-  });
 
   const t = {
     ar: {
@@ -117,17 +63,14 @@ export default function EvaluationsTable({
       good: 'جيد',
       fair: 'مقبول',
       needsImprovement: 'يحتاج تحسين',
-      addEvaluation: 'إضافة تقييم',
-      selectTrainee: 'اختر المتدرب',
-      pleaseSelectTrainee: 'الرجاء اختيار متدرب أولاً',
     },
     en: {
-      search: 'Search for evaluation...',
+      search: 'Search evaluations...',
       type: 'Type',
       all: 'All',
       monthly: 'Monthly',
       quarterly: 'Quarterly',
-      mid_term: 'Mid-term',
+      mid_term: 'Mid-Term',
       final: 'Final',
       trainee: 'Trainee',
       evaluationType: 'Evaluation Type',
@@ -135,34 +78,17 @@ export default function EvaluationsTable({
       overallScore: 'Overall Score',
       actions: 'Actions',
       view: 'View',
-      results: 'results',
-      noEvaluations: 'No evaluations available',
+      results: 'result',
+      noEvaluations: 'No evaluations found',
       excellent: 'Excellent',
       veryGood: 'Very Good',
       good: 'Good',
       fair: 'Fair',
       needsImprovement: 'Needs Improvement',
-      addEvaluation: 'Add Evaluation',
-      selectTrainee: 'Select Trainee',
-      pleaseSelectTrainee: 'Please select a trainee first',
     },
   };
 
-  const text = t[locale as 'ar' | 'en'];
-
-  // Debug logging
-  console.log('EvaluationsTable - User Role:', userRole);
-  console.log('EvaluationsTable - Supervisor ID:', supervisorId);
-  console.log('EvaluationsTable - Assigned Trainees:', assignedTrainees);
-  console.log('EvaluationsTable - Assigned Trainees Length:', assignedTrainees?.length || 0);
-
-  const handleAddEvaluation = () => {
-    if (!selectedTraineeId) {
-      alert(text.pleaseSelectTrainee);
-      return;
-    }
-    setIsAddDialogOpen(true);
-  };
+  const text = t[locale as keyof typeof t] || t.en;
 
   // Filter evaluations
   const filteredEvaluations = evaluations.filter((evaluation) => {
@@ -201,87 +127,6 @@ export default function EvaluationsTable({
 
   return (
     <div className="space-y-6">
-      {/* Debug Info - Remove after testing */}
-      {userRole === 'supervisor' && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-          <p className="text-sm font-mono">
-            <strong>Debug Info:</strong><br/>
-            User Role: {userRole}<br/>
-            Supervisor ID: {supervisorId || 'null'}<br/>
-            Assigned Trainees: {assignedTrainees?.length || 0}<br/>
-            Show Button: {String(Boolean(userRole === 'supervisor' && supervisorId && assignedTrainees && assignedTrainees.length > 0))}
-          </p>
-        </div>
-      )}
-
-      {/* Add Evaluation Section - Only for Supervisors */}
-      {userRole === 'supervisor' && supervisorId && assignedTrainees && assignedTrainees.length > 0 && (
-        <div className="bg-white rounded-lg shadow-md border-2 border-gray-200 p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <Plus className="h-5 w-5 text-blue-600" />
-            {text.addEvaluation}
-          </h3>
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <label className="text-sm font-semibold text-gray-700 mb-2 block">
-                {text.selectTrainee} <span className="text-red-500">*</span>
-              </label>
-              <Select 
-                value={selectedTraineeId} 
-                onValueChange={setSelectedTraineeId}
-                defaultLabel={(() => {
-                  const label = selectedTraineeId 
-                    ? assignedTrainees.find(t => t.id === selectedTraineeId)?.user?.full_name || ''
-                    : '';
-                  console.log('Select defaultLabel:', { 
-                    selectedTraineeId, 
-                    label,
-                    trainee: assignedTrainees.find(t => t.id === selectedTraineeId)
-                  });
-                  return label;
-                })()}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={text.selectTrainee} />
-                </SelectTrigger>
-                <SelectContent>
-                  {assignedTrainees.map((trainee) => (
-                    <SelectItem 
-                      key={trainee.id} 
-                      value={trainee.id}
-                      label={trainee.user?.full_name || 'متدرب'}
-                    >
-                      <div className="flex items-center gap-3 w-full">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-700 font-bold text-sm">
-                          {trainee.user?.full_name?.charAt(0) || 'م'}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-gray-900 truncate">
-                            {trainee.user?.full_name}
-                          </div>
-                          <div className="text-xs text-gray-500 truncate">
-                            {locale === 'ar' ? trainee.institution?.name_ar : trainee.institution?.name_en}
-                          </div>
-                        </div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-end">
-              <Button 
-                onClick={handleAddEvaluation} 
-                className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 h-11 shadow-md hover:shadow-lg transition-all"
-              >
-                <Plus className="mr-2 h-5 w-5" />
-                {text.addEvaluation}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Evaluations Table */}
       <div className="bg-white rounded-lg shadow">
       {/* Header */}
@@ -428,34 +273,6 @@ export default function EvaluationsTable({
           locale={locale}
         />
       )}
-
-      {/* Add Evaluation Dialog */}
-      {selectedTraineeId && assignedTrainees && (() => {
-        const selectedTrainee = assignedTrainees.find(t => t.id === selectedTraineeId);
-        if (!selectedTrainee) return null;
-        
-        return (
-          <AddEvaluationDialogEnhanced
-            isOpen={isAddDialogOpen}
-            onClose={() => setIsAddDialogOpen(false)}
-            onSuccess={() => {
-              setIsAddDialogOpen(false);
-              window.location.reload();
-            }}
-            locale={locale}
-            trainee={{
-              id: selectedTrainee.id,
-              user_id: selectedTrainee.user_id,
-              full_name: selectedTrainee.user?.full_name || '',
-              email: selectedTrainee.user?.email || '',
-              institution_name: locale === 'ar' 
-                ? selectedTrainee.institution?.name_ar || ''
-                : selectedTrainee.institution?.name_en || '',
-            }}
-            supervisorId={supervisorId!}
-          />
-        );
-      })()}
     </div>
   );
 }

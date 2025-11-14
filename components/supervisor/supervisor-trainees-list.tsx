@@ -1,7 +1,9 @@
 'use client';
 
-import { Users, Award } from 'lucide-react';
+import { useState } from 'react';
+import { Users, Award, Plus } from 'lucide-react';
 import Link from 'next/link';
+import AddEvaluationDialogEnhanced from '@/components/evaluations/add-evaluation-dialog-enhanced';
 
 interface Trainee {
   id: string;
@@ -29,6 +31,9 @@ export default function SupervisorTraineesList({
   supervisorId,
   locale,
 }: SupervisorTraineesListProps) {
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [selectedTraineeId, setSelectedTraineeId] = useState<string>('');
+  
   const t = {
     ar: {
       myTrainees: 'متدربيني',
@@ -38,6 +43,7 @@ export default function SupervisorTraineesList({
       completed: 'مكتمل',
       viewDetails: 'عرض التفاصيل',
       noTrainees: 'لا يوجد متدربون معينون',
+      addEvaluation: 'إضافة تقييم',
     },
     en: {
       myTrainees: 'My Trainees',
@@ -47,6 +53,7 @@ export default function SupervisorTraineesList({
       completed: 'Completed',
       viewDetails: 'View Details',
       noTrainees: 'No trainees assigned',
+      addEvaluation: 'Add Evaluation',
     },
   };
 
@@ -127,12 +134,16 @@ export default function SupervisorTraineesList({
                     >
                       {getStatusText(trainee.status)}
                     </span>
-                    <Link
-                      href={`/${locale}/supervisors/${supervisorId}/trainees`}
-                      className="text-blue-600 hover:text-blue-700"
+                    <button
+                      onClick={() => {
+                        setSelectedTraineeId(trainee.id);
+                        setIsAddDialogOpen(true);
+                      }}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
                     >
-                      <Award size={20} />
-                    </Link>
+                      <Plus size={16} />
+                      {text.addEvaluation}
+                    </button>
                   </div>
                 </div>
               );
@@ -140,6 +151,34 @@ export default function SupervisorTraineesList({
           </div>
         )}
       </div>
+      
+      {/* Add Evaluation Dialog */}
+      {selectedTraineeId && (
+        <AddEvaluationDialogEnhanced
+          isOpen={isAddDialogOpen}
+          onClose={() => {
+            setIsAddDialogOpen(false);
+            setSelectedTraineeId('');
+          }}
+          onSuccess={() => {
+            setIsAddDialogOpen(false);
+            setSelectedTraineeId('');
+            // Refresh page to show new evaluation
+            window.location.reload();
+          }}
+          trainee={{
+            id: selectedTraineeId,
+            user_id: trainees.find(t => t.id === selectedTraineeId)?.user_id || '',
+            full_name: trainees.find(t => t.id === selectedTraineeId)?.user?.full_name || '',
+            email: trainees.find(t => t.id === selectedTraineeId)?.user?.email || '',
+            institution_name: locale === 'ar' 
+              ? trainees.find(t => t.id === selectedTraineeId)?.institution?.name_ar || ''
+              : trainees.find(t => t.id === selectedTraineeId)?.institution?.name || '',
+          }}
+          supervisorId={supervisorId}
+          locale={locale}
+        />
+      )}
     </div>
   );
 }

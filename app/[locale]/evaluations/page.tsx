@@ -57,9 +57,6 @@ export default async function EvaluationsPage({
     )
     .order('evaluation_date', { ascending: false });
 
-  let supervisorId: string | null = null;
-  let assignedTrainees: any[] = [];
-
   // If supervisor, only show evaluations they created
   if (userProfile.role === 'supervisor') {
     const { data: supervisorData } = await supabase
@@ -69,81 +66,7 @@ export default async function EvaluationsPage({
       .single();
 
     if (supervisorData) {
-      supervisorId = supervisorData.id;
       evaluationsQuery = evaluationsQuery.eq('supervisor_id', supervisorData.id);
-      
-      // Get assigned trainees for supervisor - using separate queries
-      const { data: assignments } = await supabase
-        .from('supervisor_trainee')
-        .select('trainee_id')
-        .eq('supervisor_id', supervisorData.id);
-
-      console.log('Assignments found:', assignments?.length || 0);
-
-      // Get trainee details separately
-      const traineeIds = (assignments || []).map((a: any) => a.trainee_id);
-      
-      if (traineeIds.length > 0) {
-        const { data: traineesData } = await supabase
-          .from('trainees')
-          .select('id, user_id, institution_id')
-          .in('id', traineeIds);
-
-        if (traineesData && traineesData.length > 0) {
-          // Get user details
-          const userIds = traineesData.map((t: any) => t.user_id).filter(Boolean);
-          console.log('SERVER - User IDs to fetch:', userIds);
-          
-          const { data: usersData, error: usersError } = await supabase
-            .from('users')
-            .select('id, full_name, email, avatar_url')
-            .in('id', userIds);
-          
-          console.log('SERVER - Users Data:', usersData);
-          console.log('SERVER - Users Error:', usersError);
-
-          // Get institution details
-          const institutionIds = traineesData.map((t: any) => t.institution_id).filter(Boolean);
-          console.log('SERVER - Institution IDs to fetch:', institutionIds);
-          
-          const { data: institutionsData, error: institutionsError } = await supabase
-            .from('institutions')
-            .select('id, name_ar, name_en')
-            .in('id', institutionIds);
-          
-          console.log('SERVER - Institutions Data:', institutionsData);
-          console.log('SERVER - Institutions Error:', institutionsError);
-
-          // Combine the data - flatten for serialization
-          assignedTrainees = traineesData.map((trainee: any) => {
-            const user = usersData?.find((u: any) => u.id === trainee.user_id);
-            const institution = institutionsData?.find((i: any) => i.id === trainee.institution_id);
-            
-            return {
-              id: trainee.id,
-              user_id: trainee.user_id,
-              institution_id: trainee.institution_id,
-              user: user ? {
-                id: user.id,
-                full_name: user.full_name,
-                email: user.email,
-                avatar_url: user.avatar_url
-              } : null,
-              institution: institution ? {
-                id: institution.id,
-                name_ar: institution.name_ar,
-                name_en: institution.name_en
-              } : null
-            };
-          });
-          
-          console.log('SERVER - Combined assignedTrainees:', JSON.stringify(assignedTrainees, null, 2));
-        }
-      }
-      
-      console.log('Supervisor ID:', supervisorId);
-      console.log('Assigned Trainees Count:', assignedTrainees.length);
-      console.log('Assigned Trainees:', assignedTrainees);
     } else {
       evaluationsQuery = evaluationsQuery.eq('supervisor_id', 'none');
     }
@@ -301,9 +224,6 @@ export default async function EvaluationsPage({
         <EvaluationsTable 
           evaluations={evaluations} 
           locale={params.locale}
-          userRole={userProfile.role}
-          supervisorId={supervisorId}
-          assignedTrainees={assignedTrainees}
         />
       </div>
     </DashboardLayout>
