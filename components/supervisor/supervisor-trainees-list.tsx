@@ -98,38 +98,45 @@ export default function SupervisorTraineesList({
           <p className="text-center text-gray-500 py-8">{text.noTrainees}</p>
         ) : (
           <div className="space-y-4">
-            {trainees.slice(0, 5).map((trainee) => (
-              <div
-                key={trainee.id}
-                className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
-              >
-                <div className="flex-1">
-                  <h3 className="font-medium text-gray-900">
-                    {trainee.user.full_name}
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    {locale === 'ar'
-                      ? trainee.institution.name_ar
-                      : trainee.institution.name}
-                  </p>
+            {trainees.slice(0, 5).map((trainee) => {
+              // Skip trainees with missing user or institution data
+              if (!trainee.user || !trainee.institution) {
+                return null;
+              }
+              
+              return (
+                <div
+                  key={trainee.id}
+                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                >
+                  <div className="flex-1">
+                    <h3 className="font-medium text-gray-900">
+                      {trainee.user.full_name}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {locale === 'ar'
+                        ? trainee.institution.name_ar
+                        : trainee.institution.name}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
+                        trainee.status
+                      )}`}
+                    >
+                      {getStatusText(trainee.status)}
+                    </span>
+                    <Link
+                      href={`/${locale}/supervisors/${supervisorId}/trainees`}
+                      className="text-blue-600 hover:text-blue-700"
+                    >
+                      <Award size={20} />
+                    </Link>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
-                      trainee.status
-                    )}`}
-                  >
-                    {getStatusText(trainee.status)}
-                  </span>
-                  <Link
-                    href={`/${locale}/supervisors/${supervisorId}/trainees`}
-                    className="text-blue-600 hover:text-blue-700"
-                  >
-                    <Award size={20} />
-                  </Link>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

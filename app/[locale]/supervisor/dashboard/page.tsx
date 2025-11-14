@@ -74,22 +74,20 @@ export default async function SupervisorDashboardPage({
     .from('supervisor_trainee')
     .select(
       `
-      trainee:trainees(
+      trainee:trainees!inner(
         id,
         user_id,
         institution_id,
         status,
-        user:users(full_name, email),
-        institution:institutions(name, name_ar)
+        user:users!inner(full_name, email),
+        institution:institutions!inner(name, name_ar)
       )
     `
     )
     .eq('supervisor_id', supervisor.id);
 
   // Filter out null trainees
-  const trainees = assignedTrainees
-    ?.filter((at: any) => at.trainee !== null)
-    .map((at: any) => at.trainee) || [];
+  const trainees = assignedTrainees?.map((at: any) => at.trainee) || [];
   const traineeIds = trainees.map((t: any) => t.id);
 
   // Get statistics
