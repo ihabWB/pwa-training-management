@@ -184,11 +184,15 @@ export default function SupervisorEvaluationsList({
               </SelectTrigger>
               <SelectContent>
                 {assignedTrainees.map((trainee) => (
-                  <SelectItem key={trainee.id} value={trainee.id}>
-                    <div className="flex items-center gap-2">
+                  <SelectItem 
+                    key={trainee.id} 
+                    value={trainee.id}
+                    label={trainee.user?.full_name || 'متدرب'}
+                  >
+                    <div className="flex flex-col">
                       <span className="font-medium">{trainee.user?.full_name}</span>
-                      <span className="text-sm text-muted-foreground">
-                        ({locale === 'ar' ? trainee.institution?.name_ar : trainee.institution?.name_en})
+                      <span className="text-xs text-muted-foreground">
+                        {locale === 'ar' ? trainee.institution?.name_ar : trainee.institution?.name_en}
                       </span>
                     </div>
                   </SelectItem>

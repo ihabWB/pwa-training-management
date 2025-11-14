@@ -6,6 +6,8 @@ import { cn } from '@/lib/utils';
 const SelectContext = React.createContext<{
   value: string;
   onValueChange: (value: string) => void;
+  selectedLabel: string;
+  setSelectedLabel: (label: string) => void;
 } | null>(null);
 
 export interface SelectProps {
@@ -15,8 +17,15 @@ export interface SelectProps {
 }
 
 function Select({ value, onValueChange, children }: SelectProps) {
+  const [selectedLabel, setSelectedLabel] = React.useState('');
+  
   return (
-    <SelectContext.Provider value={{ value: value || '', onValueChange: onValueChange || (() => {}) }}>
+    <SelectContext.Provider value={{ 
+      value: value || '', 
+      onValueChange: onValueChange || (() => {}),
+      selectedLabel,
+      setSelectedLabel
+    }}>
       {children}
     </SelectContext.Provider>
   );
@@ -67,7 +76,7 @@ interface SelectValueProps {
 
 function SelectValue({ placeholder }: SelectValueProps) {
   const context = React.useContext(SelectContext);
-  return <span>{context?.value || placeholder}</span>;
+  return <span>{context?.selectedLabel || context?.value || placeholder}</span>;
 }
 
 const SelectContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
@@ -91,11 +100,18 @@ SelectContent.displayName = 'SelectContent';
 interface SelectItemProps extends React.HTMLAttributes<HTMLDivElement> {
   value: string;
   children: React.ReactNode;
+  label?: string;
 }
 
 const SelectItem = React.forwardRef<HTMLDivElement, SelectItemProps>(
-  ({ className, children, value, ...props }, ref) => {
+  ({ className, children, value, label, ...props }, ref) => {
     const context = React.useContext(SelectContext);
+
+    const handleClick = () => {
+      context?.onValueChange(value);
+      // Set the label to display in the trigger
+      context?.setSelectedLabel(label || (typeof children === 'string' ? children : value));
+    };
 
     return (
       <div
@@ -104,7 +120,7 @@ const SelectItem = React.forwardRef<HTMLDivElement, SelectItemProps>(
           'relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 px-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
           className
         )}
-        onClick={() => context?.onValueChange(value)}
+        onClick={handleClick}
         {...props}
       >
         {children}
