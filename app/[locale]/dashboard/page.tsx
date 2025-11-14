@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic';
 import { Metadata } from 'next';
 import DashboardLayout from '@/components/layout/dashboard-layout';
 import StatCard from '@/components/dashboard/stat-card';
+import OrphanedTraineesAlert from '@/components/admin/orphaned-trainees-alert';
 import { Users, Building2, UserCheck, FileText, ListTodo, TrendingUp } from 'lucide-react';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
@@ -153,6 +154,9 @@ export default async function DashboardPage({
           <h1 className="text-3xl font-bold text-gray-900">لوحة التحكم</h1>
           <p className="text-gray-600 mt-1">مرحباً بعودتك، {userProfile.full_name}</p>
         </div>
+
+        {/* Orphaned Trainees Alert - Admin Only */}
+        {userProfile.role === 'admin' && <OrphanedTraineesAlert locale={locale} />}
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
