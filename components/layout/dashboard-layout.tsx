@@ -24,6 +24,8 @@ export default function DashboardLayout({
 
   useEffect(() => {
     const updateMargin = () => {
+      if (typeof window === 'undefined') return;
+      
       if (window.innerWidth >= 1024) {
         setMarginValue(isCollapsed ? '5rem' : '16rem');
       } else {
@@ -32,8 +34,11 @@ export default function DashboardLayout({
     };
 
     updateMargin();
-    window.addEventListener('resize', updateMargin);
-    return () => window.removeEventListener('resize', updateMargin);
+    
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', updateMargin);
+      return () => window.removeEventListener('resize', updateMargin);
+    }
   }, [isCollapsed]);
   
   return (
