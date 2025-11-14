@@ -96,6 +96,11 @@ export default function AddTraineeDialog({
       } else {
         // Add mode - create new trainee
         
+        // Validate required fields
+        if (!formData.institution_id) {
+          throw new Error(locale === 'ar' ? 'يرجى اختيار المؤسسة' : 'Please select an institution');
+        }
+        
         // 1. Create auth user
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: formData.email,
@@ -109,8 +114,15 @@ export default function AddTraineeDialog({
           },
         });
 
-        if (authError) throw authError;
-        if (!authData.user) throw new Error('Failed to create user');
+        if (authError) {
+          console.error('Auth error:', authError);
+          throw new Error(`Auth error: ${authError.message}`);
+        }
+        if (!authData.user) {
+          throw new Error('Failed to create user');
+        }
+
+        console.log('User created:', authData.user.id);
 
         // 2. Create user profile
         const { error: userError } = await supabase.from('users').insert({
@@ -123,7 +135,12 @@ export default function AddTraineeDialog({
           profile_completed: true,
         });
 
-        if (userError) throw userError;
+        if (userError) {
+          console.error('User profile error:', userError);
+          throw new Error(`User profile error: ${userError.message}`);
+        }
+
+        console.log('User profile created');
 
         // 3. Create trainee record
         const { error: traineeError } = await supabase.from('trainees').insert({
@@ -137,7 +154,12 @@ export default function AddTraineeDialog({
           status: 'active',
         });
 
-        if (traineeError) throw traineeError;
+        if (traineeError) {
+          console.error('Trainee record error:', traineeError);
+          throw new Error(`Trainee record error: ${traineeError.message}`);
+        }
+
+        console.log('Trainee record created successfully');
 
         alert(locale === 'ar' ? 'تم إضافة المتدرب بنجاح' : 'Trainee added successfully');
       }
