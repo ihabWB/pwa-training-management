@@ -257,12 +257,6 @@ export default function InstitutionsTable({
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">
-                  {locale === 'ar' ? 'العنوان' : 'Address'}
-                </label>
-                <p className="text-gray-900">{selectedInstitution.address || '-'}</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">
                   {locale === 'ar' ? 'اسم نقطة الاتصال' : 'Focal Point Name'}
                 </label>
                 <p className="text-gray-900">{selectedInstitution.focal_point_name}</p>

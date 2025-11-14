@@ -30,7 +30,6 @@ export default function AddInstitutionDialog({
     focal_point_name: '',
     focal_point_phone: '',
     focal_point_email: '',
-    address: '',
     description: '',
   });
 
@@ -51,7 +50,6 @@ export default function AddInstitutionDialog({
           focal_point_name: formData.focal_point_name,
           focal_point_phone: formData.focal_point_phone,
           focal_point_email: formData.focal_point_email,
-          address: formData.address || null,
           description: formData.description || null,
         });
 
@@ -67,7 +65,6 @@ export default function AddInstitutionDialog({
         focal_point_name: '',
         focal_point_phone: '',
         focal_point_email: '',
-        address: '',
         description: '',
       });
     } catch (err: any) {
@@ -148,23 +145,8 @@ export default function AddInstitutionDialog({
                   onChange={(e) =>
                     setFormData({ ...formData, location: e.target.value })
                   }
-                  placeholder={locale === 'ar' ? 'غزة' : 'Gaza'}
+                  placeholder={locale === 'ar' ? 'غزة، شارع الوحدة' : 'Gaza, Al-Wehda Street'}
                   required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {locale === 'ar' ? 'العنوان' : 'Address'}
-                </label>
-                <Input
-                  value={formData.address}
-                  onChange={(e) =>
-                    setFormData({ ...formData, address: e.target.value })
-                  }
-                  placeholder={
-                    locale === 'ar' ? 'شارع الوحدة، غزة' : 'Al-Wehda Street, Gaza'
-                  }
                 />
               </div>
             </div>
