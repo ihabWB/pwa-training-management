@@ -63,19 +63,41 @@ export default async function TraineeDashboardPage({
         userRole={userProfile.role}
         userName={userProfile.full_name}
       >
-        <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              {locale === 'ar' ? 'لم يتم العثور على بيانات المتدرب' : 'Trainee profile not found'}
-            </h2>
-            <p className="text-gray-600 mb-4">
-              {locale === 'ar' 
-                ? 'يرجى التواصل مع المدير لإكمال ملفك الشخصي' 
-                : 'Please contact the administrator to complete your profile'}
-            </p>
-            <p className="text-sm text-gray-500">
-              User ID: {user.id}
-            </p>
+        <div className="flex flex-col items-center justify-center min-h-[500px] space-y-6">
+          <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-8 max-w-2xl">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 bg-yellow-100 rounded-full p-3">
+                <svg className="h-8 w-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                  {locale === 'ar' ? 'الملف الشخصي غير مكتمل' : 'Incomplete Profile'}
+                </h2>
+                <p className="text-gray-700 mb-4 leading-relaxed">
+                  {locale === 'ar' 
+                    ? 'تم إنشاء حسابك بنجاح، لكن بيانات المتدرب الخاصة بك لم تكتمل بعد. يرجى التواصل مع المدير لإكمال ملفك الشخصي.' 
+                    : 'Your account has been created successfully, but your trainee profile data is incomplete. Please contact the administrator to complete your profile.'}
+                </p>
+                <div className="bg-white rounded-lg p-4 border border-yellow-200 mb-4">
+                  <p className="text-sm font-medium text-gray-700 mb-1">
+                    {locale === 'ar' ? 'معلومات للمدير:' : 'Information for Administrator:'}
+                  </p>
+                  <p className="text-xs text-gray-600 font-mono bg-gray-50 p-2 rounded">
+                    User ID: {user.id}
+                  </p>
+                </div>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-sm text-blue-800">
+                    <strong>{locale === 'ar' ? 'للمدير:' : 'For Administrator:'}</strong>
+                    {locale === 'ar' 
+                      ? ' يمكنك إكمال بيانات هذا المتدرب من خلال صفحة "إصلاح سجلات المتدربين" في لوحة تحكم الأدمن.'
+                      : ' You can complete this trainee\'s data through the "Fix Trainee Records" page in the admin dashboard.'}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </DashboardLayout>
