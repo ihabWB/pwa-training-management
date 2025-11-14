@@ -38,7 +38,7 @@ export default async function TraineeDashboardPage({
   }
 
   // Get trainee details
-  const { data: traineeData } = await supabase
+  const { data: traineeData, error: traineeError } = await supabase
     .from('trainees')
     .select(`
       *,
@@ -51,8 +51,35 @@ export default async function TraineeDashboardPage({
     .eq('user_id', user.id)
     .single();
 
+  if (traineeError) {
+    console.error('Trainee fetch error:', traineeError);
+  }
+
   if (!traineeData) {
-    redirect(`/${locale}/dashboard`);
+    // Trainee record not found - redirect to complete profile or show error
+    return (
+      <DashboardLayout
+        locale={locale}
+        userRole={userProfile.role}
+        userName={userProfile.full_name}
+      >
+        <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              {locale === 'ar' ? 'لم يتم العثور على بيانات المتدرب' : 'Trainee profile not found'}
+            </h2>
+            <p className="text-gray-600 mb-4">
+              {locale === 'ar' 
+                ? 'يرجى التواصل مع المدير لإكمال ملفك الشخصي' 
+                : 'Please contact the administrator to complete your profile'}
+            </p>
+            <p className="text-sm text-gray-500">
+              User ID: {user.id}
+            </p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
   }
 
   // Combine trainee data with user profile
