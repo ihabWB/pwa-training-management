@@ -134,7 +134,7 @@ export default function EvaluationsTable({
   console.log('EvaluationsTable - User Role:', userRole);
   console.log('EvaluationsTable - Supervisor ID:', supervisorId);
   console.log('EvaluationsTable - Assigned Trainees:', assignedTrainees);
-  console.log('EvaluationsTable - Assigned Trainees Length:', assignedTrainees.length);
+  console.log('EvaluationsTable - Assigned Trainees Length:', assignedTrainees?.length || 0);
 
   const handleAddEvaluation = () => {
     if (!selectedTraineeId) {
@@ -188,14 +188,14 @@ export default function EvaluationsTable({
             <strong>Debug Info:</strong><br/>
             User Role: {userRole}<br/>
             Supervisor ID: {supervisorId || 'null'}<br/>
-            Assigned Trainees: {assignedTrainees.length}<br/>
-            Show Button: {(userRole === 'supervisor' && supervisorId && assignedTrainees.length > 0).toString()}
+            Assigned Trainees: {assignedTrainees?.length || 0}<br/>
+            Show Button: {String(Boolean(userRole === 'supervisor' && supervisorId && assignedTrainees && assignedTrainees.length > 0))}
           </p>
         </div>
       )}
 
       {/* Add Evaluation Section - Only for Supervisors */}
-      {userRole === 'supervisor' && supervisorId && assignedTrainees.length > 0 && (
+      {userRole === 'supervisor' && supervisorId && assignedTrainees && assignedTrainees.length > 0 && (
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -376,7 +376,7 @@ export default function EvaluationsTable({
       )}
 
       {/* Add Evaluation Dialog */}
-      {selectedTraineeId && (() => {
+      {selectedTraineeId && assignedTrainees && (() => {
         const selectedTrainee = assignedTrainees.find(t => t.id === selectedTraineeId);
         if (!selectedTrainee) return null;
         
