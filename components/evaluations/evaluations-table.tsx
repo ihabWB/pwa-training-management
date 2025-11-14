@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Award, Calendar, User } from 'lucide-react';
+import { Search, Award, Calendar, User, Check, XCircle } from 'lucide-react';
 import ViewEvaluationDialog from './view-evaluation-dialog';
+import ReviewEvaluationDialog from './review-evaluation-dialog';
 
 interface Evaluation {
   id: string;
@@ -25,21 +26,28 @@ interface Evaluation {
   recommendations: string | null;
   notes: string | null;
   created_at: string;
+  status?: string;
+  approved_by?: string | null;
+  approved_at?: string | null;
+  admin_feedback?: string | null;
 }
 
 interface EvaluationsTableProps {
   evaluations: Evaluation[];
   locale: string;
+  userRole?: string;
 }
 
 export default function EvaluationsTable({
   evaluations,
   locale,
+  userRole,
 }: EvaluationsTableProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [selectedEvaluation, setSelectedEvaluation] = useState<Evaluation | null>(null);
   const [showViewDialog, setShowViewDialog] = useState(false);
+  const [showReviewDialog, setShowReviewDialog] = useState(false);
 
   const t = {
     ar: {
@@ -243,15 +251,31 @@ export default function EvaluationsTable({
                     </div>
                   </td>
                   <td className="px-6 py-4">
-                    <button
-                      onClick={() => {
-                        setSelectedEvaluation(evaluation);
-                        setShowViewDialog(true);
-                      }}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                    >
-                      {text.view}
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          setSelectedEvaluation(evaluation);
+                          setShowViewDialog(true);
+                        }}
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      >
+                        {text.view}
+                      </button>
+                      
+                      {/* Admin Review Buttons */}
+                      {userRole === 'admin' && evaluation.status === 'pending' && (
+                        <button
+                          onClick={() => {
+                            setSelectedEvaluation(evaluation);
+                            setShowReviewDialog(true);
+                          }}
+                          className="flex items-center gap-1 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+                        >
+                          <Check size={14} />
+                          {locale === 'ar' ? 'مراجعة' : 'Review'}
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -267,6 +291,19 @@ export default function EvaluationsTable({
           isOpen={showViewDialog}
           onClose={() => {
             setShowViewDialog(false);
+            setSelectedEvaluation(null);
+          }}
+          evaluation={selectedEvaluation}
+          locale={locale}
+        />
+      )}
+
+      {/* Review Evaluation Dialog (Admin) */}
+      {showReviewDialog && selectedEvaluation && (
+        <ReviewEvaluationDialog
+          isOpen={showReviewDialog}
+          onClose={() => {
+            setShowReviewDialog(false);
             setSelectedEvaluation(null);
           }}
           evaluation={selectedEvaluation}
