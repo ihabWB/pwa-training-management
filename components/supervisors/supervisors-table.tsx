@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import AddSupervisorDialog from './add-supervisor-dialog';
 import AssignTraineeDialog from './assign-trainee-dialog';
+import SupervisorTraineesModal from './supervisor-trainees-modal';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { exportSupervisorsToExcel } from '@/lib/export/excel';
@@ -61,6 +62,15 @@ export default function SupervisorsTable({
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedSupervisor, setSelectedSupervisor] = useState<Supervisor | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [traineesModalState, setTraineesModalState] = useState<{
+    isOpen: boolean;
+    supervisorId: string;
+    supervisorName: string;
+  }>({
+    isOpen: false,
+    supervisorId: '',
+    supervisorName: '',
+  });
   const [assignDialogState, setAssignDialogState] = useState<{
     isOpen: boolean;
     supervisorId: string;
@@ -84,6 +94,14 @@ export default function SupervisorsTable({
 
   const openAssignDialog = (supervisor: Supervisor) => {
     setAssignDialogState({
+      isOpen: true,
+      supervisorId: supervisor.id,
+      supervisorName: supervisor.full_name,
+    });
+  };
+
+  const openTraineesModal = (supervisor: Supervisor) => {
+    setTraineesModalState({
       isOpen: true,
       supervisorId: supervisor.id,
       supervisorName: supervisor.full_name,
@@ -239,10 +257,16 @@ export default function SupervisorsTable({
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2">
-                        <Badge className="bg-blue-100 text-blue-800">
-                          <Users size={14} className="mr-1" />
-                          {supervisor.trainee_count || 0}
-                        </Badge>
+                        <button
+                          onClick={() => openTraineesModal(supervisor)}
+                          className="hover:opacity-80 transition-opacity"
+                          title={locale === 'ar' ? 'عرض المتدربين' : 'View trainees'}
+                        >
+                          <Badge className="bg-blue-100 text-blue-800 cursor-pointer hover:bg-blue-200">
+                            <Users size={14} className="mr-1" />
+                            {supervisor.trainee_count || 0}
+                          </Badge>
+                        </button>
                         <button
                           onClick={() => openAssignDialog(supervisor)}
                           className="text-blue-600 hover:text-blue-900"
@@ -302,6 +326,21 @@ export default function SupervisorsTable({
         supervisorId={assignDialogState.supervisorId}
         supervisorName={assignDialogState.supervisorName}
         availableTrainees={availableTrainees}
+        locale={locale}
+      />
+
+      {/* Supervisor Trainees Modal */}
+      <SupervisorTraineesModal
+        isOpen={traineesModalState.isOpen}
+        onClose={() =>
+          setTraineesModalState({
+            isOpen: false,
+            supervisorId: '',
+            supervisorName: '',
+          })
+        }
+        supervisorId={traineesModalState.supervisorId}
+        supervisorName={traineesModalState.supervisorName}
         locale={locale}
       />
 
