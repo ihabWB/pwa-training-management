@@ -80,11 +80,14 @@ export default async function MyTraineesPage({
     .eq('supervisor_id', supervisor.id)
     .order('assigned_date', { ascending: false });
 
-  const trainees = assignedTrainees?.map((at: any) => ({
-    ...at.trainee,
-    is_primary_supervisor: at.is_primary,
-    assigned_date: at.assigned_date,
-  })) || [];
+  // Filter out null trainees and map the data
+  const trainees = assignedTrainees
+    ?.filter((at: any) => at.trainee !== null)
+    .map((at: any) => ({
+      ...at.trainee,
+      is_primary_supervisor: at.is_primary,
+      assigned_date: at.assigned_date,
+    })) || [];
 
   return (
     <DashboardLayout locale={locale} userRole="supervisor" userName={user.full_name}>

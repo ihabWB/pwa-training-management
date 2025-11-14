@@ -86,7 +86,10 @@ export default async function SupervisorDashboardPage({
     )
     .eq('supervisor_id', supervisor.id);
 
-  const trainees = assignedTrainees?.map((at: any) => at.trainee) || [];
+  // Filter out null trainees
+  const trainees = assignedTrainees
+    ?.filter((at: any) => at.trainee !== null)
+    .map((at: any) => at.trainee) || [];
   const traineeIds = trainees.map((t: any) => t.id);
 
   // Get statistics
