@@ -84,7 +84,15 @@ export default function EvaluationsTable({
     selectedTraineeId,
     selectedTraineeName: selectedTrainee?.user?.full_name,
     assignedTraineesCount: assignedTrainees.length,
-    firstTrainee: assignedTrainees[0]?.user?.full_name
+    firstTrainee: assignedTrainees[0]?.user?.full_name,
+    firstTraineeFullObject: assignedTrainees[0],
+    allTrainees: assignedTrainees.map(t => ({
+      id: t.id,
+      hasUser: !!t.user,
+      userName: t.user?.full_name,
+      hasInstitution: !!t.institution,
+      institutionName: t.institution?.name_ar
+    }))
   });
 
   const t = {
