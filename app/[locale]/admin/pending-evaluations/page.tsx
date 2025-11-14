@@ -36,7 +36,7 @@ export default async function PendingEvaluationsPage({
   }
 
   // Fetch all evaluations with trainee and supervisor info
-  const { data: evaluations } = await supabase
+  const { data: evaluations, error: evalError } = await supabase
     .from('evaluations')
     .select(`
       *,
@@ -49,6 +49,10 @@ export default async function PendingEvaluationsPage({
       )
     `)
     .order('evaluation_date', { ascending: false });
+
+  console.log('Evaluations from DB:', evaluations);
+  console.log('Evaluations Error:', evalError);
+  console.log('First evaluation status:', evaluations?.[0]?.status);
 
   // Format evaluations data
   const formattedEvaluations = evaluations?.map((evaluation: any) => ({

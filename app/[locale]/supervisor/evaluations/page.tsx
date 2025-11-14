@@ -29,7 +29,7 @@ export default async function SupervisorEvaluationsPage({
   }
 
   // Get all evaluations created by this supervisor
-  const { data: evaluations } = await supabase
+  const { data: evaluations, error: evalError } = await supabase
     .from('evaluations')
     .select(`
       *,
@@ -43,6 +43,10 @@ export default async function SupervisorEvaluationsPage({
     `)
     .eq('supervisor_id', supervisorData.id)
     .order('created_at', { ascending: false });
+
+  console.log('SERVER - Supervisor Evaluations:', evaluations);
+  console.log('SERVER - Evaluations Error:', evalError);
+  console.log('SERVER - First evaluation status:', evaluations?.[0]?.status);
 
   // Get all trainees assigned to this supervisor - using separate queries
   const { data: assignments } = await supabase
