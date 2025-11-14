@@ -57,12 +57,13 @@ export default async function MyEvaluationsPage({
     );
   }
 
-  // Fetch evaluations
+  // Fetch evaluations - المتدرب يرى فقط التقييمات المعتمدة
   const { data: evaluations } = await supabase
     .from('evaluations')
     .select('*')
     .eq('trainee_id', traineeData.id)
-    .order('created_at', { ascending: false });
+    .eq('status', 'approved') // فقط التقييمات المعتمدة
+    .order('evaluation_date', { ascending: false });
 
   return (
     <DashboardLayout

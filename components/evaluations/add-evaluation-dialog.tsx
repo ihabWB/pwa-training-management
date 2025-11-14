@@ -144,6 +144,7 @@ export default function AddEvaluationDialog({
         areas_for_improvement: formData.areas_for_improvement,
         recommendations: formData.recommendations || null,
         notes: formData.notes || null,
+        status: 'pending', // التقييم يبدأ معلقاً حتى يعتمده الإدمن
       });
 
       if (error) throw error;
