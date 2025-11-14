@@ -72,52 +72,65 @@ export default async function MyTraineesPage({
   let trainees: any[] = [];
   
   if (traineeIds.length > 0) {
-    const { data: traineesData } = await supabase
+    const { data: traineesData, error: traineesError } = await supabase
       .from('trainees')
       .select('id, user_id, institution_id, status, university, major, start_date, expected_end_date')
       .in('id', traineeIds);
 
     console.log('Trainees data found:', traineesData?.length || 0);
+    console.log('Trainees error:', traineesError);
 
-    // Get user details
-    const userIds = (traineesData || []).map((t: any) => t.user_id);
-    console.log('User IDs:', userIds);
-    
-    const { data: usersData } = await supabase
-      .from('users')
-      .select('id, full_name, email, phone_number')
-      .in('id', userIds);
+    if (traineesData && traineesData.length > 0) {
+      // Get user details
+      const userIds = traineesData.map((t: any) => t.user_id).filter(Boolean);
+      console.log('User IDs:', userIds);
+      
+      const { data: usersData, error: usersError } = await supabase
+        .from('users')
+        .select('id, full_name, email, phone_number')
+        .in('id', userIds);
 
-    console.log('Users data found:', usersData?.length || 0);
+      console.log('Users data found:', usersData?.length || 0, usersData);
+      console.log('Users error:', usersError);
 
-    // Get institution details
-    const institutionIds = (traineesData || []).map((t: any) => t.institution_id);
-    console.log('Institution IDs:', institutionIds);
-    
-    const { data: institutionsData } = await supabase
-      .from('institutions')
-      .select('id, name, name_ar, location')
-      .in('id', institutionIds);
+      // Get institution details
+      const institutionIds = traineesData.map((t: any) => t.institution_id).filter(Boolean);
+      console.log('Institution IDs:', institutionIds);
+      
+      const { data: institutionsData, error: institutionsError } = await supabase
+        .from('institutions')
+        .select('id, name, name_ar, location')
+        .in('id', institutionIds);
 
-    console.log('Institutions data found:', institutionsData?.length || 0);
+      console.log('Institutions data found:', institutionsData?.length || 0);
+      console.log('Institutions error:', institutionsError);
 
-    // Combine all data
-    trainees = (traineesData || []).map((trainee: any) => {
-      const assignment = assignments?.find((a: any) => a.trainee_id === trainee.id);
-      const user = usersData?.find((u: any) => u.id === trainee.user_id);
-      const institution = institutionsData?.find((i: any) => i.id === trainee.institution_id);
+      // Combine all data
+      trainees = traineesData.map((trainee: any) => {
+        const assignment = assignments?.find((a: any) => a.trainee_id === trainee.id);
+        const user = usersData?.find((u: any) => u.id === trainee.user_id);
+        const institution = institutionsData?.find((i: any) => i.id === trainee.institution_id);
 
-      return {
-        ...trainee,
-        user,
-        institution,
-        is_primary_supervisor: assignment?.is_primary || false,
-        assigned_date: assignment?.assigned_date,
-      };
-    }).filter((t: any) => t.user && t.institution); // Only include trainees with complete data
-    
-    console.log('Final trainees count:', trainees.length);
-    console.log('Trainees:', JSON.stringify(trainees, null, 2));
+        console.log(`Trainee ${trainee.id}:`, { user, institution });
+
+        return {
+          ...trainee,
+          user,
+          institution,
+          is_primary_supervisor: assignment?.is_primary || false,
+          assigned_date: assignment?.assigned_date,
+        };
+      }).filter((t: any) => {
+        const hasData = t.user && t.institution;
+        if (!hasData) {
+          console.log('Filtered out trainee:', t.id, 'user:', !!t.user, 'institution:', !!t.institution);
+        }
+        return hasData;
+      });
+      
+      console.log('Final trainees count:', trainees.length);
+      console.log('Final trainees:', trainees);
+    }
   }
 
   return (
