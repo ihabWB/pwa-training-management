@@ -4,7 +4,6 @@ import { useTranslations } from 'next-intl';
 import { Bell, Globe, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
 
 interface NavbarProps {
   locale: string;
@@ -54,19 +53,17 @@ export default function Navbar({ locale, notificationCount = 0 }: NavbarProps) {
           </Button>
 
           {/* Notifications */}
-          <Link href={`/${locale}/notifications`}>
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell size={20} />
-              {notificationCount > 0 && (
-                <Badge 
-                  className="absolute -top-1 -right-1 px-1.5 min-w-[20px] h-5 flex items-center justify-center"
-                  variant="destructive"
-                >
-                  {notificationCount > 9 ? '9+' : notificationCount}
-                </Badge>
-              )}
-            </Button>
-          </Link>
+          <Button variant="ghost" size="icon" className="relative" disabled>
+            <Bell size={20} />
+            {notificationCount > 0 && (
+              <Badge 
+                className="absolute -top-1 -right-1 px-1.5 min-w-[20px] h-5 flex items-center justify-center"
+                variant="destructive"
+              >
+                {notificationCount > 9 ? '9+' : notificationCount}
+              </Badge>
+            )}
+          </Button>
         </div>
       </div>
     </header>
