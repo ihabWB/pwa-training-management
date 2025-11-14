@@ -16,12 +16,22 @@ const SelectContext = React.createContext<{
 export interface SelectProps {
   value?: string;
   onValueChange?: (value: string) => void;
+  defaultLabel?: string; // Add this to accept the display label
   children: React.ReactNode;
 }
 
-function Select({ value, onValueChange, children }: SelectProps) {
-  const [selectedLabel, setSelectedLabel] = React.useState('');
+function Select({ value, onValueChange, defaultLabel, children }: SelectProps) {
+  const [selectedLabel, setSelectedLabel] = React.useState(defaultLabel || '');
   const [isOpen, setIsOpen] = React.useState(false);
+  
+  // Update selectedLabel when defaultLabel changes
+  React.useEffect(() => {
+    if (defaultLabel) {
+      setSelectedLabel(defaultLabel);
+    } else if (!value) {
+      setSelectedLabel('');
+    }
+  }, [value, defaultLabel]);
   
   return (
     <SelectContext.Provider value={{ 
@@ -126,16 +136,19 @@ const SelectItem = React.forwardRef<HTMLDivElement, SelectItemProps>(
   ({ className, children, value, label, ...props }, ref) => {
     const context = React.useContext(SelectContext);
     const isSelected = context?.value === value;
+    const displayLabel = label || (typeof children === 'string' ? children : value);
 
     const handleClick = () => {
       context?.onValueChange(value);
-      context?.setSelectedLabel(label || (typeof children === 'string' ? children : value));
+      context?.setSelectedLabel(displayLabel);
       context?.setIsOpen(false);
     };
 
     return (
       <div
         ref={ref}
+        data-value={value}
+        data-label={displayLabel}
         className={cn(
           'relative flex w-full cursor-pointer select-none items-center rounded-md px-3 py-2.5 text-sm transition-all',
           isSelected 

@@ -206,7 +206,15 @@ export default function EvaluationsTable({
               <label className="text-sm font-semibold text-gray-700 mb-2 block">
                 {text.selectTrainee} <span className="text-red-500">*</span>
               </label>
-              <Select value={selectedTraineeId} onValueChange={setSelectedTraineeId}>
+              <Select 
+                value={selectedTraineeId} 
+                onValueChange={setSelectedTraineeId}
+                defaultLabel={
+                  selectedTraineeId 
+                    ? assignedTrainees.find(t => t.id === selectedTraineeId)?.user?.full_name || ''
+                    : ''
+                }
+              >
                 <SelectTrigger>
                   <SelectValue placeholder={text.selectTrainee} />
                 </SelectTrigger>
