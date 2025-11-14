@@ -55,39 +55,53 @@ export default async function MyTraineesPage({
     redirect(`/${locale}/dashboard`);
   }
 
-  // Get assigned trainees with full details
-  const { data: assignedTrainees } = await supabase
+  // Get assigned trainees - using separate queries to avoid join issues
+  const { data: assignments } = await supabase
     .from('supervisor_trainee')
-    .select(
-      `
-      id,
-      is_primary,
-      assigned_date,
-      trainee:trainees(
-        id,
-        user_id,
-        institution_id,
-        status,
-        university,
-        major,
-        start_date,
-        expected_end_date,
-        user:users(full_name, email, phone_number),
-        institution:institutions(name, name_ar, location)
-      )
-    `
-    )
+    .select('id, trainee_id, is_primary, assigned_date')
     .eq('supervisor_id', supervisor.id)
     .order('assigned_date', { ascending: false });
 
-  // Filter out trainees with missing data
-  const trainees = assignedTrainees
-    ?.filter((at: any) => at.trainee && at.trainee.user && at.trainee.institution)
-    .map((at: any) => ({
-      ...at.trainee,
-      is_primary_supervisor: at.is_primary,
-      assigned_date: at.assigned_date,
-    })) || [];
+  // Get trainee details separately
+  const traineeIds = (assignments || []).map((a: any) => a.trainee_id);
+  
+  let trainees: any[] = [];
+  
+  if (traineeIds.length > 0) {
+    const { data: traineesData } = await supabase
+      .from('trainees')
+      .select('id, user_id, institution_id, status, university, major, start_date, expected_end_date')
+      .in('id', traineeIds);
+
+    // Get user details
+    const userIds = (traineesData || []).map((t: any) => t.user_id);
+    const { data: usersData } = await supabase
+      .from('users')
+      .select('id, full_name, email, phone_number')
+      .in('id', userIds);
+
+    // Get institution details
+    const institutionIds = (traineesData || []).map((t: any) => t.institution_id);
+    const { data: institutionsData } = await supabase
+      .from('institutions')
+      .select('id, name, name_ar, location')
+      .in('id', institutionIds);
+
+    // Combine all data
+    trainees = (traineesData || []).map((trainee: any) => {
+      const assignment = assignments?.find((a: any) => a.trainee_id === trainee.id);
+      const user = usersData?.find((u: any) => u.id === trainee.user_id);
+      const institution = institutionsData?.find((i: any) => i.id === trainee.institution_id);
+
+      return {
+        ...trainee,
+        user,
+        institution,
+        is_primary_supervisor: assignment?.is_primary || false,
+        assigned_date: assignment?.assigned_date,
+      };
+    }).filter((t: any) => t.user && t.institution); // Only include trainees with complete data
+  }
 
   return (
     <DashboardLayout locale={locale} userRole="supervisor" userName={user.full_name}>

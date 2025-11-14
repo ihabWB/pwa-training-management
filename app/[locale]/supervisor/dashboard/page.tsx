@@ -69,28 +69,51 @@ export default async function SupervisorDashboardPage({
     redirect(`/${locale}/dashboard`);
   }
 
-  // Get assigned trainees
-  const { data: assignedTrainees } = await supabase
+  // Get assigned trainees - using separate queries to avoid join issues
+  const { data: assignments } = await supabase
     .from('supervisor_trainee')
-    .select(
-      `
-      trainee:trainees(
-        id,
-        user_id,
-        institution_id,
-        status,
-        user:users(full_name, email),
-        institution:institutions(name, name_ar)
-      )
-    `
-    )
+    .select('trainee_id')
     .eq('supervisor_id', supervisor.id);
 
-  // Filter out trainees with missing data
-  const trainees = assignedTrainees
-    ?.filter((at: any) => at.trainee && at.trainee.user && at.trainee.institution)
-    .map((at: any) => at.trainee) || [];
-  const traineeIds = trainees.map((t: any) => t.id);
+  const traineeIds = (assignments || []).map((a: any) => a.trainee_id);
+
+  let trainees: any[] = [];
+
+  if (traineeIds.length > 0) {
+    const { data: traineesData } = await supabase
+      .from('trainees')
+      .select('id, user_id, institution_id, status')
+      .in('id', traineeIds);
+
+    // Get user details
+    const userIds = (traineesData || []).map((t: any) => t.user_id);
+    const { data: usersData } = await supabase
+      .from('users')
+      .select('id, full_name, email')
+      .in('id', userIds);
+
+    // Get institution details
+    const institutionIds = (traineesData || []).map((t: any) => t.institution_id);
+    const { data: institutionsData } = await supabase
+      .from('institutions')
+      .select('id, name, name_ar')
+      .in('id', institutionIds);
+
+    // Combine all data
+    trainees = (traineesData || []).map((trainee: any) => {
+      const user = usersData?.find((u: any) => u.id === trainee.user_id);
+      const institution = institutionsData?.find((i: any) => i.id === trainee.institution_id);
+
+      return {
+        ...trainee,
+        user,
+        institution,
+      };
+    }).filter((t: any) => t.user && t.institution);
+  }
+
+  // Get trainee IDs for reports/tasks queries
+  const finalTraineeIds = trainees.map((t: any) => t.id);
 
   // Get statistics
   const totalTraineesData = await supabase
@@ -109,14 +132,14 @@ export default async function SupervisorDashboardPage({
   const pendingReportsData = await supabase
     .from('reports')
     .select('*')
-    .in('trainee_id', traineeIds)
+    .in('trainee_id', finalTraineeIds.length > 0 ? finalTraineeIds : ['none'])
     .eq('status', 'pending');
   const pendingReports = pendingReportsData.data?.length || 0;
 
   const pendingTasksData = await supabase
     .from('tasks')
     .select('*')
-    .in('assigned_to', traineeIds)
+    .in('assigned_to', finalTraineeIds.length > 0 ? finalTraineeIds : ['none'])
     .in('status', ['pending', 'in_progress']);
   const pendingTasks = pendingTasksData.data?.length || 0;
 
