@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Search, Award, User, BookOpen, GraduationCap } from 'lucide-react';
-import AddEvaluationDialog from '../evaluations/add-evaluation-dialog';
+import AddEvaluationDialogEnhanced from '../evaluations/add-evaluation-dialog-enhanced';
 
 interface Trainee {
   id: string;
@@ -209,7 +209,7 @@ export default function SupervisorTraineesTable({
 
       {/* Add Evaluation Dialog */}
       {showEvaluationDialog && selectedTrainee && (
-        <AddEvaluationDialog
+        <AddEvaluationDialogEnhanced
           isOpen={showEvaluationDialog}
           onClose={() => {
             setShowEvaluationDialog(false);
