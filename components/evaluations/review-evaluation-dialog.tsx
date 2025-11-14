@@ -11,8 +11,8 @@ interface Evaluation {
   supervisor_name: string;
   evaluation_type: 'monthly' | 'quarterly' | 'final' | 'mid_term';
   evaluation_date: string;
-  period_start?: string;
-  period_end?: string;
+  period_start: string | null;
+  period_end: string | null;
   technical_skills_score: number;
   communication_score: number;
   teamwork_score: number;
@@ -21,9 +21,12 @@ interface Evaluation {
   overall_score: number;
   strengths: string;
   areas_for_improvement: string;
-  recommendations?: string;
-  notes?: string;
-  status: 'pending' | 'approved' | 'rejected';
+  recommendations: string | null;
+  notes: string | null;
+  status?: string;
+  approved_by?: string | null;
+  approved_at?: string | null;
+  admin_feedback?: string | null;
 }
 
 interface ReviewEvaluationDialogProps {
@@ -288,7 +291,7 @@ export default function ReviewEvaluationDialog({
           )}
 
           {/* Actions */}
-          {evaluation.status === 'pending' && (
+          {(!evaluation.status || evaluation.status === 'pending') && (
             <div className="flex gap-3 pt-4 border-t">
               <button
                 type="button"
