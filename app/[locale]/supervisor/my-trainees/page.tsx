@@ -63,7 +63,7 @@ export default async function MyTraineesPage({
       id,
       is_primary,
       assigned_date,
-      trainee:trainees!inner(
+      trainee:trainees(
         id,
         user_id,
         institution_id,
@@ -72,20 +72,22 @@ export default async function MyTraineesPage({
         major,
         start_date,
         expected_end_date,
-        user:users!inner(full_name, email, phone_number),
-        institution:institutions!inner(name, name_ar, location)
+        user:users(full_name, email, phone_number),
+        institution:institutions(name, name_ar, location)
       )
     `
     )
     .eq('supervisor_id', supervisor.id)
     .order('assigned_date', { ascending: false });
 
-  // Filter out null trainees and map the data
-  const trainees = assignedTrainees?.map((at: any) => ({
-    ...at.trainee,
-    is_primary_supervisor: at.is_primary,
-    assigned_date: at.assigned_date,
-  })) || [];
+  // Filter out trainees with missing data
+  const trainees = assignedTrainees
+    ?.filter((at: any) => at.trainee && at.trainee.user && at.trainee.institution)
+    .map((at: any) => ({
+      ...at.trainee,
+      is_primary_supervisor: at.is_primary,
+      assigned_date: at.assigned_date,
+    })) || [];
 
   return (
     <DashboardLayout locale={locale} userRole="supervisor" userName={user.full_name}>
