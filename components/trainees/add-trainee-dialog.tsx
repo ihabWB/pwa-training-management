@@ -101,6 +101,22 @@ export default function AddTraineeDialog({
           throw new Error(locale === 'ar' ? 'يرجى اختيار المؤسسة' : 'Please select an institution');
         }
         
+        if (!formData.start_date) {
+          throw new Error(locale === 'ar' ? 'يرجى إدخال تاريخ البدء' : 'Please enter start date');
+        }
+        
+        if (!formData.expected_end_date) {
+          throw new Error(locale === 'ar' ? 'يرجى إدخال تاريخ الانتهاء المتوقع' : 'Please enter expected end date');
+        }
+        
+        console.log('Creating trainee with data:', {
+          institution_id: formData.institution_id,
+          start_date: formData.start_date,
+          expected_end_date: formData.expected_end_date,
+          university: formData.university,
+          major: formData.major,
+        });
+        
         // 1. Create auth user
         const { data: authData, error: authError } = await supabase.auth.signUp({
           email: formData.email,
@@ -152,7 +168,7 @@ export default function AddTraineeDialog({
         console.log('User profile created');
 
         // 3. Create trainee record
-        const { error: traineeError } = await supabase.from('trainees').insert({
+        console.log('Inserting trainee record with data:', {
           user_id: authData.user.id,
           institution_id: formData.institution_id,
           university: formData.university,
@@ -160,11 +176,22 @@ export default function AddTraineeDialog({
           graduation_year: formData.graduation_year,
           start_date: formData.start_date,
           expected_end_date: formData.expected_end_date,
-          status: 'active',
         });
+
+        const { data: traineeInsertData, error: traineeError } = await supabase.from('trainees').insert({
+          user_id: authData.user.id,
+          institution_id: formData.institution_id,
+          university: formData.university || null,
+          major: formData.major || null,
+          graduation_year: formData.graduation_year || null,
+          start_date: formData.start_date,
+          expected_end_date: formData.expected_end_date || null,
+          status: 'active',
+        }).select();
 
         if (traineeError) {
           console.error('Trainee record error:', traineeError);
+          console.error('Error details:', JSON.stringify(traineeError, null, 2));
           
           // Rollback: Delete the created user if trainee record creation fails
           try {
@@ -177,7 +204,7 @@ export default function AddTraineeDialog({
           throw new Error(`Trainee record error: ${traineeError.message}`);
         }
 
-        console.log('Trainee record created successfully');
+        console.log('Trainee record created successfully:', traineeInsertData);
 
         alert(locale === 'ar' ? 'تم إضافة المتدرب بنجاح' : 'Trainee added successfully');
       }
