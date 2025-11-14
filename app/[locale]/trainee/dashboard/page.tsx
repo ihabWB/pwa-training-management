@@ -45,7 +45,7 @@ export default async function TraineeDashboardPage({
       institutions (
         name,
         name_ar,
-        address
+        location
       )
     `)
     .eq('user_id', user.id)

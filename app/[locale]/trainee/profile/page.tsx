@@ -40,7 +40,7 @@ export default async function TraineeProfilePage({
       institutions (
         name,
         name_ar,
-        address
+        location
       )
     `)
     .eq('user_id', user.id)
