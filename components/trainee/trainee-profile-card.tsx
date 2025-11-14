@@ -63,13 +63,13 @@ export default function TraineeProfileCard({
               </span>
             </div>
             <span className="text-2xl font-bold">
-              {progressPercentage.toFixed(0)}%
+              {(progressPercentage || 0).toFixed(0)}%
             </span>
           </div>
           <div className="w-full bg-white/20 rounded-full h-3 mb-3">
             <div
               className="bg-white h-3 rounded-full transition-all duration-500"
-              style={{ width: `${progressPercentage}%` }}
+              style={{ width: `${progressPercentage || 0}%` }}
             ></div>
           </div>
           <div className="text-sm text-blue-100">

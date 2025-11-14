@@ -206,14 +206,14 @@ export default async function TraineeDashboardPage({
           />
           <StatCard
             title={locale === 'ar' ? 'متوسط التقييم' : 'Average Score'}
-            value={averageScore.toFixed(1)}
+            value={(averageScore || 0).toFixed(1)}
             icon={Award}
             iconColor="text-purple-600"
             iconBgColor="bg-purple-100"
           />
           <StatCard
             title={locale === 'ar' ? 'نسبة الإنجاز' : 'Progress'}
-            value={`${progressPercentage.toFixed(0)}%`}
+            value={`${(progressPercentage || 0).toFixed(0)}%`}
             icon={TrendingUp}
             iconColor="text-green-600"
             iconBgColor="bg-green-100"

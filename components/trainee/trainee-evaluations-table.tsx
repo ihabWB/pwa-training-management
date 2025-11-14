@@ -92,12 +92,12 @@ export default function TraineeEvaluationsTable({
                 {locale === 'ar' ? 'متوسط التقييمات' : 'Average Score'}
               </p>
               <p className="text-2xl font-bold text-purple-900">
-                {averageScore.toFixed(2)} / 5.0
+                {(averageScore || 0).toFixed(2)} / 5.0
               </p>
             </div>
           </div>
           <div className="text-right">
-            {renderStars(Math.round(averageScore))}
+            {renderStars(Math.round(averageScore || 0))}
             <p className="text-sm text-gray-600 mt-1">
               {evaluations.length} {locale === 'ar' ? 'تقييمات' : 'evaluations'}
             </p>
@@ -143,14 +143,14 @@ export default function TraineeEvaluationsTable({
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center gap-2">
                     <span className="text-lg font-bold text-gray-900">
-                      {evaluation.score.toFixed(1)}
+                      {(evaluation.score || 0).toFixed(1)}
                     </span>
-                    {renderStars(evaluation.score)}
+                    {renderStars(evaluation.score || 0)}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <Badge className={`w-fit ${getScoreColor(evaluation.score)}`}>
-                    {getScoreLabel(evaluation.score)}
+                  <Badge className={`w-fit ${getScoreColor(evaluation.score || 0)}`}>
+                    {getScoreLabel(evaluation.score || 0)}
                   </Badge>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -212,11 +212,11 @@ export default function TraineeEvaluationsTable({
                   </label>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-2xl font-bold text-gray-900">
-                      {selectedEvaluation.score.toFixed(1)}
+                      {(selectedEvaluation.score || 0).toFixed(1)}
                     </span>
                     <span className="text-gray-500">/ 5.0</span>
                   </div>
-                  <div className="mt-2">{renderStars(selectedEvaluation.score)}</div>
+                  <div className="mt-2">{renderStars(selectedEvaluation.score || 0)}</div>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-gray-700">

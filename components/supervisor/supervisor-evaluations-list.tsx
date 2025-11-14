@@ -312,8 +312,8 @@ export default function SupervisorEvaluationsList({
                       </div>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <div className={`text-2xl font-bold ${getScoreColor(evaluation.overall_score)}`}>
-                        {evaluation.overall_score.toFixed(1)}
+                      <div className={`text-2xl font-bold ${getScoreColor(evaluation.overall_score || 0)}`}>
+                        {(evaluation.overall_score || 0).toFixed(1)}
                       </div>
                       <div className="text-xs text-muted-foreground mt-1">/ 5.0</div>
                     </td>

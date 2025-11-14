@@ -165,7 +165,7 @@ export default async function SupervisorEvaluationsPage({
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">{text.avgScore}</p>
-              <h3 className="text-2xl font-bold mt-2">{avgScore.toFixed(1)}/5</h3>
+              <h3 className="text-2xl font-bold mt-2">{(avgScore || 0).toFixed(1)}/5</h3>
             </div>
             <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
               <svg
