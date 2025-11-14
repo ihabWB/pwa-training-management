@@ -11,8 +11,8 @@ interface Evaluation {
   institution_name: string;
   evaluation_type: 'monthly' | 'quarterly' | 'final' | 'mid_term';
   evaluation_date: string;
-  period_start?: string;
-  period_end?: string;
+  period_start: string | null;
+  period_end: string | null;
   technical_skills_score: number;
   communication_score: number;
   teamwork_score: number;
@@ -21,11 +21,12 @@ interface Evaluation {
   overall_score: number;
   strengths: string;
   areas_for_improvement: string;
-  recommendations?: string;
-  notes?: string;
-  status: 'pending' | 'approved' | 'rejected';
-  approved_at?: string;
-  admin_feedback?: string;
+  recommendations: string | null;
+  notes: string | null;
+  status?: string;
+  approved_by?: string | null;
+  approved_at?: string | null;
+  admin_feedback?: string | null;
 }
 
 interface PendingEvaluationsTableProps {
@@ -255,10 +256,10 @@ export default function PendingEvaluationsTable({
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span
                       className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(
-                        evaluation.status
+                        evaluation.status || 'pending'
                       )}`}
                     >
-                      {text[evaluation.status as keyof typeof text]}
+                      {text[(evaluation.status || 'pending') as keyof typeof text]}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
