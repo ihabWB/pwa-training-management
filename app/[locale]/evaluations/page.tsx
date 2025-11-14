@@ -112,6 +112,8 @@ export default async function EvaluationsPage({
             user: usersData?.find((u: any) => u.id === trainee.user_id),
             institution: institutionsData?.find((i: any) => i.id === trainee.institution_id)
           }));
+          
+          console.log('SERVER - Combined assignedTrainees:', JSON.stringify(assignedTrainees, null, 2));
         }
       }
       
@@ -277,7 +279,7 @@ export default async function EvaluationsPage({
           locale={params.locale}
           userRole={userProfile.role}
           supervisorId={supervisorId}
-          assignedTrainees={assignedTrainees}
+          assignedTrainees={JSON.parse(JSON.stringify(assignedTrainees))}
         />
       </div>
     </DashboardLayout>

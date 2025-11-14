@@ -229,11 +229,17 @@ export default function EvaluationsTable({
               <Select 
                 value={selectedTraineeId} 
                 onValueChange={setSelectedTraineeId}
-                defaultLabel={
-                  selectedTraineeId 
+                defaultLabel={(() => {
+                  const label = selectedTraineeId 
                     ? assignedTrainees.find(t => t.id === selectedTraineeId)?.user?.full_name || ''
-                    : ''
-                }
+                    : '';
+                  console.log('Select defaultLabel:', { 
+                    selectedTraineeId, 
+                    label,
+                    trainee: assignedTrainees.find(t => t.id === selectedTraineeId)
+                  });
+                  return label;
+                })()}
               >
                 <SelectTrigger>
                   <SelectValue placeholder={text.selectTrainee} />
