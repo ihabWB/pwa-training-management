@@ -51,11 +51,28 @@ export default function ReviewReportDialog({
     try {
       const supabase = createClient();
 
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('User not authenticated');
+
+      // Get supervisor ID from user ID
+      const { data: supervisorData, error: supervisorError } = await supabase
+        .from('supervisors')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (supervisorError) {
+        // If not a supervisor, try to get admin (admins can also review)
+        // For now, just use null if not a supervisor
+        console.warn('User is not a supervisor:', supervisorError);
+      }
+
       const { error: updateError } = await supabase
         .from('reports')
         .update({
           status: newStatus,
-          reviewed_by: (await supabase.auth.getUser()).data.user?.id,
+          reviewed_by: supervisorData?.id || null,
           reviewed_at: new Date().toISOString(),
           feedback: feedback || null,
         })
