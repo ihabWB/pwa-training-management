@@ -220,6 +220,25 @@ export default async function EvaluationsPage({
           </div>
         </div>
 
+        {/* Debug Info - معلومات التشخيص */}
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <h3 className="font-bold text-yellow-900 mb-2">🔍 معلومات التشخيص:</h3>
+          <div className="text-sm font-mono space-y-1 text-right">
+            <div>عدد التقييمات: {evaluations.length}</div>
+            <div>الدور: {userProfile.role}</div>
+            <div>أول تقييم - الحالة: <span className="font-bold text-red-600">{evaluationsData?.[0]?.status || 'غير موجود ❌'}</span></div>
+            <div>أول تقييم - ID: {evaluationsData?.[0]?.id || 'غير موجود'}</div>
+            {evaluationsData?.[0] && (
+              <details className="mt-2">
+                <summary className="cursor-pointer text-yellow-900 font-bold">عرض البيانات الكاملة</summary>
+                <pre className="mt-2 p-2 bg-white rounded text-xs overflow-auto max-h-60 text-left" dir="ltr">
+                  {JSON.stringify(evaluationsData[0], null, 2)}
+                </pre>
+              </details>
+            )}
+          </div>
+        </div>
+
         {/* Evaluations Table */}
         <EvaluationsTable 
           evaluations={evaluations} 

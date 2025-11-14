@@ -169,6 +169,22 @@ export default async function PendingEvaluationsPage({
 
         {/* Evaluations Table */}
         <div className="bg-white rounded-lg shadow">
+          {/* Debug Info - عرض البيانات للتشخيص */}
+          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg mb-4">
+            <h3 className="font-bold text-yellow-900 mb-2">معلومات التشخيص:</h3>
+            <div className="text-sm font-mono space-y-1">
+              <div>عدد التقييمات: {formattedEvaluations.length}</div>
+              <div>أول تقييم - الحالة: {formattedEvaluations[0]?.status || 'غير موجود'}</div>
+              <div>أول تقييم - ID: {formattedEvaluations[0]?.id || 'غير موجود'}</div>
+              <div className="mt-2">
+                البيانات الكاملة:
+                <pre className="mt-1 p-2 bg-white rounded text-xs overflow-auto max-h-40">
+                  {JSON.stringify(formattedEvaluations[0], null, 2)}
+                </pre>
+              </div>
+            </div>
+          </div>
+          
           <PendingEvaluationsTable 
             evaluations={formattedEvaluations} 
             locale={locale} 
