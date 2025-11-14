@@ -77,8 +77,8 @@ export default function Sidebar({
   ];
 
   const supervisorMenu = [
-    { icon: LayoutDashboard, label: t('dashboard'), href: `/${locale}/dashboard` },
-    { icon: Users, label: t('trainees'), href: `/${locale}/my-trainees` },
+    { icon: LayoutDashboard, label: t('dashboard'), href: `/${locale}/supervisor/dashboard` },
+    { icon: Users, label: t('trainees'), href: `/${locale}/supervisor/my-trainees` },
     { icon: FileText, label: t('reports'), href: `/${locale}/reports` },
     { icon: ListTodo, label: t('tasks'), href: `/${locale}/tasks` },
     { icon: ClipboardCheck, label: t('evaluations'), href: `/${locale}/evaluations` },
