@@ -1,7 +1,9 @@
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import DashboardLayout from '@/components/layout/dashboard-layout';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import TraineeReportsTable from '@/components/trainee/trainee-reports-table';
+import { Plus } from 'lucide-react';
 
 export const revalidate = 30;
 
@@ -72,15 +74,26 @@ export default async function MyReportsPage({
     >
       <div className="space-y-6">
         {/* Page Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            {locale === 'ar' ? 'تقاريري' : 'My Reports'}
-          </h1>
-          <p className="text-gray-600 mt-1">
-            {locale === 'ar'
-              ? 'عرض وإدارة تقاريرك'
-              : 'View and manage your reports'}
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {locale === 'ar' ? 'تقاريري' : 'My Reports'}
+            </h1>
+            <p className="text-gray-600 mt-1">
+              {locale === 'ar'
+                ? 'عرض وإدارة تقاريرك'
+                : 'View and manage your reports'}
+            </p>
+          </div>
+          
+          {/* Add Report Button */}
+          <Link
+            href={`/${locale}/trainee/my-reports/new`}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Plus size={20} />
+            {locale === 'ar' ? 'إضافة تقرير جديد' : 'Add New Report'}
+          </Link>
         </div>
 
         {/* Reports Table */}
