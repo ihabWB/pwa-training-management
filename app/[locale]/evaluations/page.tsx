@@ -89,6 +89,10 @@ export default async function EvaluationsPage({
       assignedTrainees = assignedTraineesData
         ?.map((item: any) => item.trainee)
         .filter((trainee: any) => trainee !== null) || [];
+      
+      console.log('Supervisor ID:', supervisorId);
+      console.log('Assigned Trainees Count:', assignedTrainees.length);
+      console.log('Assigned Trainees:', assignedTrainees);
     } else {
       evaluationsQuery = evaluationsQuery.eq('supervisor_id', 'none');
     }

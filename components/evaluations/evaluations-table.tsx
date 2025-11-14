@@ -130,6 +130,12 @@ export default function EvaluationsTable({
 
   const text = t[locale as 'ar' | 'en'];
 
+  // Debug logging
+  console.log('EvaluationsTable - User Role:', userRole);
+  console.log('EvaluationsTable - Supervisor ID:', supervisorId);
+  console.log('EvaluationsTable - Assigned Trainees:', assignedTrainees);
+  console.log('EvaluationsTable - Assigned Trainees Length:', assignedTrainees.length);
+
   const handleAddEvaluation = () => {
     if (!selectedTraineeId) {
       alert(text.pleaseSelectTrainee);
@@ -175,6 +181,19 @@ export default function EvaluationsTable({
 
   return (
     <div className="space-y-6">
+      {/* Debug Info - Remove after testing */}
+      {userRole === 'supervisor' && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+          <p className="text-sm font-mono">
+            <strong>Debug Info:</strong><br/>
+            User Role: {userRole}<br/>
+            Supervisor ID: {supervisorId || 'null'}<br/>
+            Assigned Trainees: {assignedTrainees.length}<br/>
+            Show Button: {(userRole === 'supervisor' && supervisorId && assignedTrainees.length > 0).toString()}
+          </p>
+        </div>
+      )}
+
       {/* Add Evaluation Section - Only for Supervisors */}
       {userRole === 'supervisor' && supervisorId && assignedTrainees.length > 0 && (
         <div className="bg-white rounded-lg shadow p-6">
