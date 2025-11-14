@@ -22,35 +22,9 @@ export default function LoginPage() {
     setError('');
 
     try {
-      console.log('🔐 Starting login process...');
-      const result = await signIn(email, password);
-      console.log('✅ Sign in successful:', result);
-      
-      // Check if user profile exists
-      const { createClient } = await import('@/lib/supabase/client');
-      const supabase = createClient();
-      const { data: profile, error: profileError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', result.user?.id)
-        .single();
-      
-      if (profileError) {
-        console.error('❌ Profile fetch error:', profileError);
-        setError(`خطأ في جلب بيانات المستخدم: ${profileError.message}`);
-        return;
-      }
-      
-      if (!profile) {
-        console.error('❌ No profile found for user');
-        setError('لم يتم العثور على بيانات المستخدم في النظام');
-        return;
-      }
-      
-      console.log('✅ Profile found:', profile);
+      await signIn(email, password);
       router.push('/dashboard');
     } catch (err: any) {
-      console.error('❌ Login error:', err);
       setError(err.message || 'فشل تسجيل الدخول');
     } finally {
       setLoading(false);
