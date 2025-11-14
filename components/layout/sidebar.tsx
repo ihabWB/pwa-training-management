@@ -85,11 +85,11 @@ export default function Sidebar({
   ];
 
   const traineeMenu = [
-    { icon: LayoutDashboard, label: t('dashboard'), href: `/${locale}/dashboard` },
-    { icon: UserCircle, label: t('profile'), href: `/${locale}/profile` },
-    { icon: FileText, label: t('reports'), href: `/${locale}/my-reports` },
-    { icon: ListTodo, label: t('tasks'), href: `/${locale}/my-tasks` },
-    { icon: ClipboardCheck, label: t('evaluations'), href: `/${locale}/my-evaluations` },
+    { icon: LayoutDashboard, label: t('dashboard'), href: `/${locale}/trainee/dashboard` },
+    { icon: UserCircle, label: t('profile'), href: `/${locale}/trainee/profile` },
+    { icon: FileText, label: t('reports'), href: `/${locale}/trainee/my-reports` },
+    { icon: ListTodo, label: t('tasks'), href: `/${locale}/trainee/my-tasks` },
+    { icon: ClipboardCheck, label: t('evaluations'), href: `/${locale}/trainee/my-evaluations` },
   ];
 
   const menuItems = userRole === 'admin' ? adminMenu : userRole === 'supervisor' ? supervisorMenu : traineeMenu;
