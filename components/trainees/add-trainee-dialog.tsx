@@ -137,6 +137,15 @@ export default function AddTraineeDialog({
 
         if (userError) {
           console.error('User profile error:', userError);
+          
+          // Rollback: Delete the created auth user
+          try {
+            await supabase.auth.admin.deleteUser(authData.user.id);
+            console.log('Rollback: Auth user deleted after profile creation failure');
+          } catch (rollbackError) {
+            console.error('Rollback failed:', rollbackError);
+          }
+          
           throw new Error(`User profile error: ${userError.message}`);
         }
 
@@ -156,6 +165,15 @@ export default function AddTraineeDialog({
 
         if (traineeError) {
           console.error('Trainee record error:', traineeError);
+          
+          // Rollback: Delete the created user if trainee record creation fails
+          try {
+            await supabase.auth.admin.deleteUser(authData.user.id);
+            console.log('Rollback: User deleted after trainee creation failure');
+          } catch (rollbackError) {
+            console.error('Rollback failed:', rollbackError);
+          }
+          
           throw new Error(`Trainee record error: ${traineeError.message}`);
         }
 
