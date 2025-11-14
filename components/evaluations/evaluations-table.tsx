@@ -196,10 +196,16 @@ export default function EvaluationsTable({
 
       {/* Add Evaluation Section - Only for Supervisors */}
       {userRole === 'supervisor' && supervisorId && assignedTrainees && assignedTrainees.length > 0 && (
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow-md border-2 border-gray-200 p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <Plus className="h-5 w-5 text-blue-600" />
+            {text.addEvaluation}
+          </h3>
           <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <label className="text-sm font-medium mb-2 block">{text.selectTrainee}</label>
+            <div className="flex-1 relative">
+              <label className="text-sm font-semibold text-gray-700 mb-2 block">
+                {text.selectTrainee} <span className="text-red-500">*</span>
+              </label>
               <Select value={selectedTraineeId} onValueChange={setSelectedTraineeId}>
                 <SelectTrigger>
                   <SelectValue placeholder={text.selectTrainee} />
@@ -211,11 +217,18 @@ export default function EvaluationsTable({
                       value={trainee.id}
                       label={trainee.user?.full_name || 'متدرب'}
                     >
-                      <div className="flex flex-col">
-                        <span className="font-medium">{trainee.user?.full_name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {locale === 'ar' ? trainee.institution?.name_ar : trainee.institution?.name_en}
-                        </span>
+                      <div className="flex items-center gap-3 w-full">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-700 font-bold text-sm">
+                          {trainee.user?.full_name?.charAt(0) || 'م'}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-gray-900 truncate">
+                            {trainee.user?.full_name}
+                          </div>
+                          <div className="text-xs text-gray-500 truncate">
+                            {locale === 'ar' ? trainee.institution?.name_ar : trainee.institution?.name_en}
+                          </div>
+                        </div>
                       </div>
                     </SelectItem>
                   ))}
@@ -223,8 +236,11 @@ export default function EvaluationsTable({
               </Select>
             </div>
             <div className="flex items-end">
-              <Button onClick={handleAddEvaluation} className="w-full md:w-auto">
-                <Plus className="mr-2 h-4 w-4" />
+              <Button 
+                onClick={handleAddEvaluation} 
+                className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 h-11 shadow-md hover:shadow-lg transition-all"
+              >
+                <Plus className="mr-2 h-5 w-5" />
                 {text.addEvaluation}
               </Button>
             </div>
