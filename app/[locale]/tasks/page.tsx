@@ -87,30 +87,21 @@ export default async function TasksPage({
       .eq('user_id', user.id)
       .single();
 
-    console.log('🔍 Trainee Data:', traineeData);
-    console.log('🔍 User ID:', user.id);
-
     if (traineeData) {
       tasksQuery = tasksQuery.eq('assigned_to', traineeData.id);
-      console.log('🔍 Querying tasks for trainee ID:', traineeData.id);
     } else {
       tasksQuery = tasksQuery.eq('assigned_to', 'none');
-      console.log('⚠️ No trainee record found for user!');
     }
   }
 
   const { data: tasksData, error: tasksError } = await tasksQuery;
 
   if (tasksError) {
-    console.error('❌ Error fetching tasks:', tasksError);
+    console.error('Error fetching tasks:', tasksError);
   }
-
-  console.log('🔍 Tasks Data:', tasksData);
-  console.log('🔍 Tasks Count:', tasksData?.length || 0);
 
   // Transform tasks data
   const tasks = (tasksData || []).map((task: any) => {
-    console.log('📝 Processing task:', task);
     return {
       id: task.id,
       title: task.title,
@@ -304,61 +295,6 @@ export default async function TasksPage({
               </div>
               <XCircle className="text-red-400" size={32} />
             </div>
-          </div>
-        </div>
-
-        {/* Debug Info - معلومات التشخيص لجميع المستخدمين */}
-        <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-6 mb-6">
-          <h3 className="font-bold text-yellow-900 mb-4 text-xl">🔍 معلومات التشخيص (Debug Info)</h3>
-          <div className="bg-white rounded p-4 text-sm font-mono space-y-2 text-right">
-            <div className="border-b pb-2 bg-blue-100 p-2 rounded">
-              <strong className="text-lg">دورك:</strong> <span className="text-xl font-bold text-blue-700">{userProfile.role}</span>
-            </div>
-            <div className="border-b pb-2">
-              <strong>عدد المهام المعروضة:</strong> {tasks.length}
-            </div>
-            <div className="border-b pb-2">
-              <strong>المهام من قاعدة البيانات:</strong> {tasksData?.length || 0}
-            </div>
-            {tasks.length > 0 ? (
-              <>
-                <div className="border-b pb-2 bg-yellow-50 p-2 rounded">
-                  <strong>المهمة الأولى - العنوان:</strong> {tasks[0].title}
-                </div>
-                <div className="border-b pb-2 bg-yellow-50 p-2 rounded">
-                  <strong>الوصف:</strong> {tasks[0].description}
-                </div>
-                <div className="border-b pb-2 bg-green-50 p-2 rounded">
-                  <strong>اسم المتدرب:</strong> {tasks[0].trainee_name}
-                </div>
-                <div className="border-b pb-2">
-                  <strong>الحالة:</strong> {tasks[0].status}
-                </div>
-                <div className="border-b pb-2">
-                  <strong>الأولوية:</strong> {tasks[0].priority}
-                </div>
-                <div className="border-b pb-2">
-                  <strong>تاريخ الاستحقاق:</strong> {tasks[0].due_date}
-                </div>
-                <details className="mt-4">
-                  <summary className="cursor-pointer text-yellow-900 font-bold bg-yellow-100 p-2 rounded hover:bg-yellow-200">
-                    📋 عرض البيانات الكاملة
-                  </summary>
-                  <pre className="mt-2 p-3 bg-gray-100 rounded text-xs overflow-auto max-h-96 text-left border" dir="ltr">
-                    {JSON.stringify(tasks[0], null, 2)}
-                  </pre>
-                </details>
-              </>
-            ) : (
-              <div className="text-center py-4 text-red-600 font-bold text-lg">
-                ⚠️ لا توجد مهام!
-                {userProfile.role === 'trainee' && (
-                  <div className="mt-2 text-sm">
-                    (تأكد أن المشرف أضاف مهمة وأسندها لك)
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
 
