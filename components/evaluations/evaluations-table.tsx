@@ -200,9 +200,12 @@ export default function EvaluationsTable({
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {text.overallScore}
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  {text.actions}
-                </th>
+                {/* Hide Actions column for trainees */}
+                {userRole !== 'trainee' && (
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {text.actions}
+                  </th>
+                )}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -250,33 +253,37 @@ export default function EvaluationsTable({
                       </span>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => {
-                          setSelectedEvaluation(evaluation);
-                          setShowViewDialog(true);
-                        }}
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                      >
-                        {text.view}
-                      </button>
-                      
-                      {/* Admin Review Buttons */}
-                      {userRole === 'admin' && evaluation.status === 'pending' && (
+                  
+                  {/* Hide Actions for trainees - they only see that evaluation exists */}
+                  {userRole !== 'trainee' && (
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
                         <button
                           onClick={() => {
                             setSelectedEvaluation(evaluation);
-                            setShowReviewDialog(true);
+                            setShowViewDialog(true);
                           }}
-                          className="flex items-center gap-1 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+                          className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                         >
-                          <Check size={14} />
-                          {locale === 'ar' ? 'مراجعة' : 'Review'}
+                          {text.view}
                         </button>
-                      )}
-                    </div>
-                  </td>
+                        
+                        {/* Admin Review Buttons */}
+                        {userRole === 'admin' && evaluation.status === 'pending' && (
+                          <button
+                            onClick={() => {
+                              setSelectedEvaluation(evaluation);
+                              setShowReviewDialog(true);
+                            }}
+                            className="flex items-center gap-1 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+                          >
+                            <Check size={14} />
+                            {locale === 'ar' ? 'مراجعة' : 'Review'}
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

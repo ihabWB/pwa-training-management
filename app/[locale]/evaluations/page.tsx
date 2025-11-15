@@ -95,22 +95,10 @@ export default async function EvaluationsPage({
     console.error('Error fetching evaluations:', evaluationsError);
   }
 
-  console.log('🔍 User Role:', userProfile.role);
-  console.log('🔍 Evaluations Count:', evaluationsData?.length || 0);
-  console.log('🔍 First Evaluation:', evaluationsData?.[0]);
-
   // Transform evaluations data with error handling
   const evaluations = (evaluationsData || [])
     .map((evaluation: any) => {
       try {
-        console.log('📝 Processing evaluation:', {
-          id: evaluation.id,
-          hasTrainees: !!evaluation.trainees,
-          hasSupervisors: !!evaluation.supervisors,
-          traineeData: evaluation.trainees,
-          supervisorData: evaluation.supervisors
-        });
-
         return {
           id: evaluation.id,
           trainee_id: evaluation.trainee_id,
@@ -141,11 +129,11 @@ export default async function EvaluationsPage({
           admin_feedback: evaluation.admin_feedback,
         };
       } catch (error) {
-        console.error('❌ Error processing evaluation:', error);
+        console.error('Error processing evaluation:', error);
         return null;
       }
     })
-    .filter((e): e is NonNullable<typeof e> => e !== null); // Type-safe filter
+    .filter((e): e is NonNullable<typeof e> => e !== null);
 
   // Calculate stats
   const stats = {
@@ -242,64 +230,6 @@ export default async function EvaluationsPage({
               </div>
               <Calendar className="text-purple-400" size={32} />
             </div>
-          </div>
-        </div>
-
-        {/* Debug Info for ALL USERS - معلومات التشخيص لجميع المستخدمين */}
-        <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-6 mb-6">
-          <h3 className="font-bold text-yellow-900 mb-4 text-xl">🔍 معلومات التشخيص (Debug Info)</h3>
-          <div className="bg-white rounded p-4 text-sm font-mono space-y-2 text-right">
-            <div className="border-b pb-2 bg-blue-100 p-2 rounded">
-              <strong className="text-lg">دورك (Your Role):</strong> <span className="text-xl font-bold text-blue-700">{userProfile.role}</span>
-            </div>
-            <div className="border-b pb-2">
-              <strong>عدد التقييمات المعروضة:</strong> {evaluations.length}
-            </div>
-            <div className="border-b pb-2">
-              <strong>عدد التقييمات من قاعدة البيانات:</strong> {evaluationsData?.length || 0}
-            </div>
-            {evaluations.length > 0 ? (
-              <>
-                <div className="border-b pb-2 bg-yellow-50 p-2 rounded">
-                  <strong>اسم المتدرب:</strong> {evaluations[0].trainee_name}
-                </div>
-                <div className="border-b pb-2 bg-yellow-50 p-2 rounded">
-                  <strong>اسم المشرف:</strong> {evaluations[0].supervisor_name}
-                </div>
-                <div className="border-b pb-2 bg-yellow-50 p-2 rounded">
-                  <strong>المؤسسة:</strong> {evaluations[0].institution_name}
-                </div>
-                <div className="border-b pb-2">
-                  <strong>الدرجة الإجمالية:</strong> {evaluations[0].overall_score}%
-                </div>
-                <div className="border-b pb-2">
-                  <strong>المهارات التقنية:</strong> {evaluations[0].technical_skills_score}%
-                </div>
-                <div className="border-b pb-2 bg-green-50 p-2 rounded">
-                  <strong>نقاط القوة:</strong> {evaluations[0].strengths || 'لا يوجد'}
-                </div>
-                <div className="border-b pb-2 bg-red-50 p-2 rounded">
-                  <strong>مجالات التحسين:</strong> {evaluations[0].areas_for_improvement || 'لا يوجد'}
-                </div>
-                <details className="mt-4">
-                  <summary className="cursor-pointer text-yellow-900 font-bold bg-yellow-100 p-2 rounded hover:bg-yellow-200">
-                    📋 عرض البيانات الكاملة (Click to expand)
-                  </summary>
-                  <pre className="mt-2 p-3 bg-gray-100 rounded text-xs overflow-auto max-h-96 text-left border" dir="ltr">
-                    {JSON.stringify(evaluations[0], null, 2)}
-                  </pre>
-                </details>
-              </>
-            ) : (
-              <div className="text-center py-4 text-red-600 font-bold text-lg">
-                ⚠️ لا توجد تقييمات!
-                {userProfile.role === 'trainee' && (
-                  <div className="mt-2 text-sm">
-                    (المتدربون يرون فقط التقييمات المعتمدة)
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
 
