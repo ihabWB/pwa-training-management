@@ -223,36 +223,6 @@ export default async function DashboardPage({
             showAssignee={true}
           />
         </div>
-
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <a
-            href={`/${locale}/trainees/new`}
-            className="p-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg text-white hover:shadow-lg transition-shadow"
-          >
-            <Users size={32} className="mb-3" />
-            <h3 className="text-lg font-semibold">إضافة متدرب جديد</h3>
-            <p className="text-sm text-blue-100 mt-1">تسجيل متدرب في البرنامج</p>
-          </a>
-          
-          <a
-            href={`/${locale}/tasks/new`}
-            className="p-6 bg-gradient-to-br from-green-500 to-green-600 rounded-lg text-white hover:shadow-lg transition-shadow"
-          >
-            <ListTodo size={32} className="mb-3" />
-            <h3 className="text-lg font-semibold">إنشاء مهمة جديدة</h3>
-            <p className="text-sm text-green-100 mt-1">تعيين مهمة للمتدربين</p>
-          </a>
-          
-          <a
-            href={`/${locale}/reports`}
-            className="p-6 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg text-white hover:shadow-lg transition-shadow"
-          >
-            <FileText size={32} className="mb-3" />
-            <h3 className="text-lg font-semibold">مراجعة التقارير</h3>
-            <p className="text-sm text-purple-100 mt-1">اعتماد ومراجعة التقارير</p>
-          </a>
-        </div>
       </div>
     </DashboardLayout>
   );
