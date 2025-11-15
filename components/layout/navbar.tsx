@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { Bell, Globe, Search } from 'lucide-react';
+import { Bell, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -42,15 +42,29 @@ export default function Navbar({ locale, notificationCount = 0 }: NavbarProps) {
 
         {/* Actions */}
         <div className="flex items-center gap-4">
-          {/* Language Switcher */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleLocale}
-            title={locale === 'ar' ? 'English' : 'العربية'}
-          >
-            <Globe size={20} />
-          </Button>
+          {/* Language Switcher - Toggle Switch */}
+          <div className="flex items-center gap-2 bg-gray-100 rounded-full p-1 shadow-sm">
+            <button
+              onClick={() => locale !== 'ar' && toggleLocale()}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                locale === 'ar' 
+                  ? 'bg-white shadow-sm text-gray-900' 
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              عربي
+            </button>
+            <button
+              onClick={() => locale !== 'en' && toggleLocale()}
+              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                locale === 'en' 
+                  ? 'bg-white shadow-sm text-gray-900' 
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              EN
+            </button>
+          </div>
 
           {/* Notifications */}
           <Button variant="ghost" size="icon" className="relative" disabled>
