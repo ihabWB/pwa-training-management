@@ -87,37 +87,48 @@ export default async function TasksPage({
       .eq('user_id', user.id)
       .single();
 
+    console.log('🔍 Trainee Data:', traineeData);
+    console.log('🔍 User ID:', user.id);
+
     if (traineeData) {
       tasksQuery = tasksQuery.eq('assigned_to', traineeData.id);
+      console.log('🔍 Querying tasks for trainee ID:', traineeData.id);
     } else {
       tasksQuery = tasksQuery.eq('assigned_to', 'none');
+      console.log('⚠️ No trainee record found for user!');
     }
   }
 
   const { data: tasksData, error: tasksError } = await tasksQuery;
 
   if (tasksError) {
-    console.error('Error fetching tasks:', tasksError);
+    console.error('❌ Error fetching tasks:', tasksError);
   }
 
+  console.log('🔍 Tasks Data:', tasksData);
+  console.log('🔍 Tasks Count:', tasksData?.length || 0);
+
   // Transform tasks data
-  const tasks = (tasksData || []).map((task: any) => ({
-    id: task.id,
-    title: task.title,
-    description: task.description,
-    trainee_id: task.assigned_to,
-    trainee_name: task.trainees.users.full_name,
-    institution_name:
-      params.locale === 'ar'
-        ? task.trainees.institutions.name_ar
-        : task.trainees.institutions.name,
-    assigned_by_name: task.assigned_by_user?.full_name || 'N/A',
-    due_date: task.due_date,
-    priority: task.priority,
-    status: task.status,
-    created_at: task.created_at,
-    completed_at: task.completed_at,
-  }));
+  const tasks = (tasksData || []).map((task: any) => {
+    console.log('📝 Processing task:', task);
+    return {
+      id: task.id,
+      title: task.title,
+      description: task.description,
+      trainee_id: task.assigned_to,
+      trainee_name: task.trainees?.users?.full_name || 'Unknown',
+      institution_name:
+        params.locale === 'ar'
+          ? task.trainees?.institutions?.name_ar || 'Unknown'
+          : task.trainees?.institutions?.name || 'Unknown',
+      assigned_by_name: task.assigned_by_user?.full_name || 'N/A',
+      due_date: task.due_date,
+      priority: task.priority,
+      status: task.status,
+      created_at: task.created_at,
+      completed_at: task.completed_at,
+    };
+  });
 
   // Fetch trainees for the add task dialog (for admin and supervisors)
   let traineesData: any[] = [];
@@ -295,6 +306,52 @@ export default async function TasksPage({
             </div>
           </div>
         </div>
+
+        {/* Debug Info - معلومات التشخيص */}
+        {userProfile.role === 'trainee' && (
+          <div className="bg-blue-50 border-2 border-blue-400 rounded-lg p-6 mb-6">
+            <h3 className="font-bold text-blue-900 mb-4 text-xl">🔍 معلومات التشخيص (Debug Info)</h3>
+            <div className="bg-white rounded p-4 text-sm font-mono space-y-2 text-right">
+              <div className="border-b pb-2 bg-blue-100 p-2 rounded">
+                <strong className="text-lg">دورك:</strong> <span className="text-xl font-bold text-blue-700">{userProfile.role}</span>
+              </div>
+              <div className="border-b pb-2">
+                <strong>عدد المهام:</strong> {tasks.length}
+              </div>
+              <div className="border-b pb-2">
+                <strong>المهام من قاعدة البيانات:</strong> {tasksData?.length || 0}
+              </div>
+              {tasks.length > 0 ? (
+                <>
+                  <div className="border-b pb-2 bg-yellow-50 p-2 rounded">
+                    <strong>المهمة الأولى - العنوان:</strong> {tasks[0].title}
+                  </div>
+                  <div className="border-b pb-2 bg-yellow-50 p-2 rounded">
+                    <strong>الوصف:</strong> {tasks[0].description}
+                  </div>
+                  <div className="border-b pb-2">
+                    <strong>الحالة:</strong> {tasks[0].status}
+                  </div>
+                  <div className="border-b pb-2">
+                    <strong>الأولوية:</strong> {tasks[0].priority}
+                  </div>
+                  <details className="mt-4">
+                    <summary className="cursor-pointer text-blue-900 font-bold bg-blue-100 p-2 rounded hover:bg-blue-200">
+                      📋 عرض البيانات الكاملة
+                    </summary>
+                    <pre className="mt-2 p-3 bg-gray-100 rounded text-xs overflow-auto max-h-96 text-left border" dir="ltr">
+                      {JSON.stringify(tasks[0], null, 2)}
+                    </pre>
+                  </details>
+                </>
+              ) : (
+                <div className="text-center py-4 text-red-600 font-bold text-lg">
+                  ⚠️ لا توجد مهام!
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Tasks Table */}
         <TasksTable
