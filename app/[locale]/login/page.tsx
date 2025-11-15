@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import { signIn } from '@/lib/supabase/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -38,8 +39,14 @@ export default function LoginPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center">
-              <span className="text-2xl font-bold text-white">PWA</span>
+            <div className="relative w-24 h-24">
+              <Image
+                src="/logo PWA.png"
+                alt="Palestinian Water Authority Logo"
+                fill
+                className="object-contain"
+                priority
+              />
             </div>
           </div>
           <CardTitle className="text-2xl font-bold">
