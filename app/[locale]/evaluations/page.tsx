@@ -95,36 +95,50 @@ export default async function EvaluationsPage({
     console.error('Error fetching evaluations:', evaluationsError);
   }
 
+  console.log('🔍 User Role:', userProfile.role);
+  console.log('🔍 Evaluations Count:', evaluationsData?.length || 0);
+  console.log('🔍 First Evaluation:', evaluationsData?.[0]);
+
   // Transform evaluations data
-  const evaluations = (evaluationsData || []).map((evaluation: any) => ({
-    id: evaluation.id,
-    trainee_id: evaluation.trainee_id,
-    trainee_name: evaluation.trainees.users.full_name,
-    institution_name:
-      params.locale === 'ar'
-        ? evaluation.trainees.institutions.name_ar
-        : evaluation.trainees.institutions.name,
-    supervisor_name: evaluation.supervisors.users.full_name,
-    evaluation_type: evaluation.evaluation_type,
-    evaluation_date: evaluation.evaluation_date,
-    period_start: evaluation.period_start,
-    period_end: evaluation.period_end,
-    technical_skills_score: evaluation.technical_skills_score,
-    communication_score: evaluation.communication_score,
-    teamwork_score: evaluation.teamwork_score,
-    initiative_score: evaluation.initiative_score,
-    professionalism_score: evaluation.professionalism_score,
-    overall_score: evaluation.overall_score,
-    strengths: evaluation.strengths,
-    areas_for_improvement: evaluation.areas_for_improvement,
-    recommendations: evaluation.recommendations,
-    notes: evaluation.notes,
-    created_at: evaluation.created_at,
-    status: evaluation.status,
-    approved_by: evaluation.approved_by,
-    approved_at: evaluation.approved_at,
-    admin_feedback: evaluation.admin_feedback,
-  }));
+  const evaluations = (evaluationsData || []).map((evaluation: any) => {
+    console.log('📝 Processing evaluation:', {
+      id: evaluation.id,
+      hasTrainees: !!evaluation.trainees,
+      hasSupervisors: !!evaluation.supervisors,
+      traineeData: evaluation.trainees,
+      supervisorData: evaluation.supervisors
+    });
+
+    return {
+      id: evaluation.id,
+      trainee_id: evaluation.trainee_id,
+      trainee_name: evaluation.trainees?.users?.full_name || 'Unknown',
+      institution_name:
+        params.locale === 'ar'
+          ? evaluation.trainees?.institutions?.name_ar || 'Unknown'
+          : evaluation.trainees?.institutions?.name || 'Unknown',
+      supervisor_name: evaluation.supervisors?.users?.full_name || 'Unknown',
+      evaluation_type: evaluation.evaluation_type,
+      evaluation_date: evaluation.evaluation_date,
+      period_start: evaluation.period_start,
+      period_end: evaluation.period_end,
+      technical_skills_score: evaluation.technical_skills_score,
+      communication_score: evaluation.communication_score,
+      teamwork_score: evaluation.teamwork_score,
+      initiative_score: evaluation.initiative_score,
+      professionalism_score: evaluation.professionalism_score,
+      overall_score: evaluation.overall_score,
+      strengths: evaluation.strengths,
+      areas_for_improvement: evaluation.areas_for_improvement,
+      recommendations: evaluation.recommendations,
+      notes: evaluation.notes,
+      created_at: evaluation.created_at,
+      status: evaluation.status,
+      approved_by: evaluation.approved_by,
+      approved_at: evaluation.approved_at,
+      admin_feedback: evaluation.admin_feedback,
+    };
+  });
 
   // Calculate stats
   const stats = {
