@@ -99,46 +99,53 @@ export default async function EvaluationsPage({
   console.log('🔍 Evaluations Count:', evaluationsData?.length || 0);
   console.log('🔍 First Evaluation:', evaluationsData?.[0]);
 
-  // Transform evaluations data
-  const evaluations = (evaluationsData || []).map((evaluation: any) => {
-    console.log('📝 Processing evaluation:', {
-      id: evaluation.id,
-      hasTrainees: !!evaluation.trainees,
-      hasSupervisors: !!evaluation.supervisors,
-      traineeData: evaluation.trainees,
-      supervisorData: evaluation.supervisors
-    });
+  // Transform evaluations data with error handling
+  const evaluations = (evaluationsData || [])
+    .map((evaluation: any) => {
+      try {
+        console.log('📝 Processing evaluation:', {
+          id: evaluation.id,
+          hasTrainees: !!evaluation.trainees,
+          hasSupervisors: !!evaluation.supervisors,
+          traineeData: evaluation.trainees,
+          supervisorData: evaluation.supervisors
+        });
 
-    return {
-      id: evaluation.id,
-      trainee_id: evaluation.trainee_id,
-      trainee_name: evaluation.trainees?.users?.full_name || 'Unknown',
-      institution_name:
-        params.locale === 'ar'
-          ? evaluation.trainees?.institutions?.name_ar || 'Unknown'
-          : evaluation.trainees?.institutions?.name || 'Unknown',
-      supervisor_name: evaluation.supervisors?.users?.full_name || 'Unknown',
-      evaluation_type: evaluation.evaluation_type,
-      evaluation_date: evaluation.evaluation_date,
-      period_start: evaluation.period_start,
-      period_end: evaluation.period_end,
-      technical_skills_score: evaluation.technical_skills_score,
-      communication_score: evaluation.communication_score,
-      teamwork_score: evaluation.teamwork_score,
-      initiative_score: evaluation.initiative_score,
-      professionalism_score: evaluation.professionalism_score,
-      overall_score: evaluation.overall_score,
-      strengths: evaluation.strengths,
-      areas_for_improvement: evaluation.areas_for_improvement,
-      recommendations: evaluation.recommendations,
-      notes: evaluation.notes,
-      created_at: evaluation.created_at,
-      status: evaluation.status,
-      approved_by: evaluation.approved_by,
-      approved_at: evaluation.approved_at,
-      admin_feedback: evaluation.admin_feedback,
-    };
-  });
+        return {
+          id: evaluation.id,
+          trainee_id: evaluation.trainee_id,
+          trainee_name: evaluation.trainees?.users?.full_name || 'Unknown',
+          institution_name:
+            params.locale === 'ar'
+              ? evaluation.trainees?.institutions?.name_ar || 'Unknown'
+              : evaluation.trainees?.institutions?.name || 'Unknown',
+          supervisor_name: evaluation.supervisors?.users?.full_name || 'Unknown',
+          evaluation_type: evaluation.evaluation_type,
+          evaluation_date: evaluation.evaluation_date,
+          period_start: evaluation.period_start,
+          period_end: evaluation.period_end,
+          technical_skills_score: evaluation.technical_skills_score || 0,
+          communication_score: evaluation.communication_score || 0,
+          teamwork_score: evaluation.teamwork_score || 0,
+          initiative_score: evaluation.initiative_score || 0,
+          professionalism_score: evaluation.professionalism_score || 0,
+          overall_score: evaluation.overall_score || 0,
+          strengths: evaluation.strengths || '',
+          areas_for_improvement: evaluation.areas_for_improvement || '',
+          recommendations: evaluation.recommendations,
+          notes: evaluation.notes,
+          created_at: evaluation.created_at,
+          status: evaluation.status,
+          approved_by: evaluation.approved_by,
+          approved_at: evaluation.approved_at,
+          admin_feedback: evaluation.admin_feedback,
+        };
+      } catch (error) {
+        console.error('❌ Error processing evaluation:', error);
+        return null;
+      }
+    })
+    .filter((e): e is NonNullable<typeof e> => e !== null); // Type-safe filter
 
   // Calculate stats
   const stats = {
