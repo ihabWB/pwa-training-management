@@ -13,7 +13,7 @@ CREATE POLICY "Supervisors can read assigned trainee users"
 -- Allow supervisors to read institutions table (for trainee institutions)
 DROP POLICY IF EXISTS "Supervisors can read institutions" ON institutions;
 CREATE POLICY "Supervisors can read institutions"
-  ON institutions FOR SELECT
+  ON institutions FOR SELECTps://pwa-hydro360.vercel.app/en/evaluations
   USING (
     auth.uid() IN (
       SELECT user_id FROM supervisors

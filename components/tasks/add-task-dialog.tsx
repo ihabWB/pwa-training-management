@@ -28,10 +28,10 @@ export default function AddTaskDialog({
   currentUserId,
 }: AddTaskDialogProps) {
   const [loading, setLoading] = useState(false);
+  const [selectedTrainees, setSelectedTrainees] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    trainee_id: '',
     due_date: '',
     priority: 'medium' as 'low' | 'medium' | 'high' | 'urgent',
   });
@@ -42,7 +42,10 @@ export default function AddTaskDialog({
       taskTitle: 'عنوان المهمة',
       taskDescription: 'وصف المهمة',
       assignTo: 'تعيين إلى',
-      selectTrainee: 'اختر متدرب',
+      selectTrainees: 'اختر المتدربين',
+      selectedCount: 'متدرب محدد',
+      selectAll: 'تحديد الكل',
+      deselectAll: 'إلغاء تحديد الكل',
       dueDate: 'تاريخ الاستحقاق',
       priority: 'الأولوية',
       low: 'منخفضة',
@@ -53,13 +56,17 @@ export default function AddTaskDialog({
       save: 'حفظ',
       saving: 'جاري الحفظ...',
       required: 'هذا الحقل مطلوب',
+      selectAtLeastOne: 'يرجى اختيار متدرب واحد على الأقل',
     },
     en: {
       addTask: 'Add New Task',
       taskTitle: 'Task Title',
       taskDescription: 'Task Description',
       assignTo: 'Assign To',
-      selectTrainee: 'Select Trainee',
+      selectTrainees: 'Select Trainees',
+      selectedCount: 'selected',
+      selectAll: 'Select All',
+      deselectAll: 'Deselect All',
       dueDate: 'Due Date',
       priority: 'Priority',
       low: 'Low',
@@ -70,28 +77,53 @@ export default function AddTaskDialog({
       save: 'Save',
       saving: 'Saving...',
       required: 'This field is required',
+      selectAtLeastOne: 'Please select at least one trainee',
     },
   };
 
   const text = t[locale as 'ar' | 'en'];
 
+  const toggleTraineeSelection = (traineeId: string) => {
+    setSelectedTrainees((prev) =>
+      prev.includes(traineeId)
+        ? prev.filter((id) => id !== traineeId)
+        : [...prev, traineeId]
+    );
+  };
+
+  const selectAllTrainees = () => {
+    setSelectedTrainees(trainees.map((t) => t.id));
+  };
+
+  const deselectAllTrainees = () => {
+    setSelectedTrainees([]);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (selectedTrainees.length === 0) {
+      alert(text.selectAtLeastOne);
+      return;
+    }
+
     setLoading(true);
 
     try {
       const supabase = createClient();
 
-      // Insert task
-      const { error } = await supabase.from('tasks').insert({
+      // Insert task for each selected trainee
+      const tasksToInsert = selectedTrainees.map((traineeId) => ({
         title: formData.title,
         description: formData.description,
-        assigned_to: formData.trainee_id,
+        assigned_to: traineeId,
         assigned_by: currentUserId,
         due_date: formData.due_date,
         priority: formData.priority,
         status: 'pending',
-      });
+      }));
+
+      const { error } = await supabase.from('tasks').insert(tasksToInsert);
 
       if (error) throw error;
 
@@ -99,10 +131,10 @@ export default function AddTaskDialog({
       setFormData({
         title: '',
         description: '',
-        trainee_id: '',
         due_date: '',
         priority: 'medium',
       });
+      setSelectedTrainees([]);
 
       onSuccess();
       onClose();
@@ -168,25 +200,66 @@ export default function AddTaskDialog({
 
           {/* Assign To */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               {text.assignTo} <span className="text-red-500">*</span>
             </label>
-            <select
-              value={formData.trainee_id}
-              onChange={(e) =>
-                setFormData({ ...formData, trainee_id: e.target.value })
-              }
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              required
-              dir={locale === 'ar' ? 'rtl' : 'ltr'}
-            >
-              <option value="">{text.selectTrainee}</option>
-              {trainees.map((trainee) => (
-                <option key={trainee.id} value={trainee.id}>
-                  {trainee.full_name} - {trainee.institution_name}
-                </option>
-              ))}
-            </select>
+            
+            {/* Selection Actions */}
+            <div className="flex items-center justify-between mb-3 pb-2 border-b">
+              <span className="text-sm text-gray-600">
+                {selectedTrainees.length} {text.selectedCount}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={selectAllTrainees}
+                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  {text.selectAll}
+                </button>
+                <span className="text-gray-400">|</span>
+                <button
+                  type="button"
+                  onClick={deselectAllTrainees}
+                  className="text-sm text-gray-600 hover:text-gray-800 font-medium"
+                >
+                  {text.deselectAll}
+                </button>
+              </div>
+            </div>
+
+            {/* Trainees List */}
+            <div className="border border-gray-300 rounded-lg max-h-60 overflow-y-auto">
+              {trainees.length === 0 ? (
+                <div className="p-4 text-center text-gray-500">
+                  {locale === 'ar' ? 'لا يوجد متدربين متاحين' : 'No trainees available'}
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-200">
+                  {trainees.map((trainee) => (
+                    <label
+                      key={trainee.id}
+                      className="flex items-center p-3 hover:bg-gray-50 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedTrainees.includes(trainee.id)}
+                        onChange={() => toggleTraineeSelection(trainee.id)}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <div className={`flex-1 ${locale === 'ar' ? 'mr-3' : 'ml-3'}`}>
+                        <div className="text-sm font-medium text-gray-900">
+                          {trainee.full_name}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {trainee.institution_name}
+                        </div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Due Date and Priority */}
