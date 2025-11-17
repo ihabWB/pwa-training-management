@@ -82,6 +82,7 @@ export default function Sidebar({
     { icon: FileText, label: t('reports'), href: `/${locale}/reports` },
     { icon: ListTodo, label: t('tasks'), href: `/${locale}/tasks` },
     { icon: ClipboardCheck, label: t('evaluations'), href: `/${locale}/evaluations` },
+    { icon: Calendar, label: t('attendance'), href: `/${locale}/supervisor/attendance` },
   ];
 
   const traineeMenu = [
@@ -90,6 +91,7 @@ export default function Sidebar({
     { icon: FileText, label: t('reports'), href: `/${locale}/trainee/my-reports` },
     { icon: ListTodo, label: t('tasks'), href: `/${locale}/trainee/my-tasks` },
     { icon: ClipboardCheck, label: t('evaluations'), href: `/${locale}/trainee/my-evaluations` },
+    { icon: Calendar, label: t('attendance'), href: `/${locale}/trainee/attendance` },
   ];
 
   const menuItems = userRole === 'admin' ? adminMenu : userRole === 'supervisor' ? supervisorMenu : traineeMenu;
