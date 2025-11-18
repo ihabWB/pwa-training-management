@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, Calendar, Megaphone, MapPin, Clock, X } from 'lucide-react';
+import { Bell, Calendar, Megaphone, MapPin, Clock, X, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
@@ -36,25 +36,61 @@ export default function AnnouncementsWidget({
   const supabase = createClient();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  const getTypeIcon = (type: string) => {
+  const getTypeConfig = (type: string) => {
     switch (type) {
       case 'workshop':
-        return <Calendar size={18} className="text-purple-600" />;
+        return {
+          icon: Calendar,
+          label: locale === 'ar' ? 'ورشة عمل' : 'Workshop',
+          bgGradient: 'from-purple-500 to-purple-600',
+          iconBg: 'bg-purple-100',
+          iconColor: 'text-purple-600',
+          borderColor: 'border-purple-200',
+        };
       case 'circular':
-        return <Megaphone size={18} className="text-green-600" />;
+        return {
+          icon: Megaphone,
+          label: locale === 'ar' ? 'تعميم' : 'Circular',
+          bgGradient: 'from-green-500 to-green-600',
+          iconBg: 'bg-green-100',
+          iconColor: 'text-green-600',
+          borderColor: 'border-green-200',
+        };
       default:
-        return <Bell size={18} className="text-blue-600" />;
+        return {
+          icon: Bell,
+          label: locale === 'ar' ? 'إعلان' : 'Announcement',
+          bgGradient: 'from-blue-500 to-blue-600',
+          iconBg: 'bg-blue-100',
+          iconColor: 'text-blue-600',
+          borderColor: 'border-blue-200',
+        };
     }
   };
 
-  const getPriorityStyles = (priority: string) => {
+  const getPriorityConfig = (priority: string) => {
     switch (priority) {
       case 'urgent':
-        return 'border-l-4 border-red-500 bg-red-50';
+        return {
+          gradient: 'from-red-500 to-rose-600',
+          badge: 'bg-red-500 text-white',
+          label: locale === 'ar' ? 'عاجل' : 'Urgent',
+          pulse: true,
+        };
       case 'important':
-        return 'border-l-4 border-orange-500 bg-orange-50';
+        return {
+          gradient: 'from-orange-500 to-amber-600',
+          badge: 'bg-orange-500 text-white',
+          label: locale === 'ar' ? 'هام' : 'Important',
+          pulse: false,
+        };
       default:
-        return 'border-l-4 border-blue-500 bg-white';
+        return {
+          gradient: '',
+          badge: '',
+          label: '',
+          pulse: false,
+        };
     }
   };
 
@@ -79,149 +115,213 @@ export default function AnnouncementsWidget({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow">
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-          <Bell size={20} className="text-blue-600" />
-          {locale === 'ar' ? 'الإعلانات والتعاميم' : 'Announcements & Circulars'}
-        </h2>
+    <div className="bg-gradient-to-br from-gray-50 to-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6">
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-white/20 backdrop-blur-sm rounded-lg">
+            <Sparkles size={24} className="text-white" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-white">
+              {locale === 'ar' ? 'الإعلانات والتعاميم' : 'Announcements & Updates'}
+            </h2>
+            <p className="text-blue-100 text-sm">
+              {locale === 'ar' 
+                ? `${announcements.length} ${announcements.length === 1 ? 'إعلان' : 'إعلانات'} جديدة` 
+                : `${announcements.length} ${announcements.length === 1 ? 'announcement' : 'announcements'}`}
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div className="divide-y divide-gray-200 max-h-96 overflow-y-auto">
-        {announcements.slice(0, 5).map((announcement) => (
-          <div
-            key={announcement.id}
-            className={`p-4 transition-colors hover:bg-gray-50 ${getPriorityStyles(announcement.priority)}`}
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex-1">
-                {/* Header */}
-                <div className="flex items-center gap-2 mb-2">
-                  {getTypeIcon(announcement.type)}
-                  <h3 className="font-semibold text-gray-900">
-                    {locale === 'ar' ? announcement.title_ar : announcement.title}
-                  </h3>
-                  {announcement.is_pinned && (
-                    <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
-                      {locale === 'ar' ? 'مثبت' : 'Pinned'}
-                    </span>
-                  )}
-                  {announcement.priority === 'urgent' && (
-                    <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full">
-                      {locale === 'ar' ? 'عاجل' : 'Urgent'}
-                    </span>
+      {/* Announcements List */}
+      <div className="p-4 space-y-4 max-h-[600px] overflow-y-auto">
+        {announcements.slice(0, 5).map((announcement) => {
+          const typeConfig = getTypeConfig(announcement.type);
+          const priorityConfig = getPriorityConfig(announcement.priority);
+          const TypeIcon = typeConfig.icon;
+          const isExpanded = expandedId === announcement.id;
+
+          return (
+            <div
+              key={announcement.id}
+              className={`relative rounded-xl border-2 ${typeConfig.borderColor} bg-white shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden ${
+                priorityConfig.pulse ? 'animate-pulse' : ''
+              }`}
+            >
+              {/* Priority Ribbon */}
+              {announcement.priority !== 'normal' && (
+                <div className={`absolute top-0 ${locale === 'ar' ? 'left-0' : 'right-0'} z-10`}>
+                  <div className={`${priorityConfig.badge} px-4 py-1 text-xs font-bold ${
+                    locale === 'ar' ? 'rounded-br-lg' : 'rounded-bl-lg'
+                  } shadow-lg flex items-center gap-1`}>
+                    {priorityConfig.pulse && (
+                      <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                    )}
+                    {priorityConfig.label}
+                  </div>
+                </div>
+              )}
+
+              {/* Pinned Badge */}
+              {announcement.is_pinned && (
+                <div className={`absolute top-0 ${locale === 'ar' ? 'right-0' : 'left-0'} z-10`}>
+                  <div className={`bg-yellow-400 text-yellow-900 px-3 py-1 text-xs font-bold ${
+                    locale === 'ar' ? 'rounded-bl-lg' : 'rounded-br-lg'
+                  } shadow-lg flex items-center gap-1`}>
+                    📌 {locale === 'ar' ? 'مثبت' : 'Pinned'}
+                  </div>
+                </div>
+              )}
+
+              <div className="p-5">
+                {/* Type Icon and Title */}
+                <div className="flex items-start gap-4 mb-4">
+                  <div className={`${typeConfig.iconBg} p-3 rounded-xl flex-shrink-0`}>
+                    <TypeIcon size={24} className={typeConfig.iconColor} />
+                  </div>
+                  
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`px-3 py-1 ${typeConfig.iconBg} ${typeConfig.iconColor} text-xs font-semibold rounded-full`}>
+                        {typeConfig.label}
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 leading-tight">
+                      {locale === 'ar' ? announcement.title_ar : announcement.title}
+                    </h3>
+                  </div>
+
+                  {traineeId && (
+                    <button
+                      onClick={() => markAsRead(announcement.id)}
+                      className="flex-shrink-0 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                      title={locale === 'ar' ? 'إزالة' : 'Dismiss'}
+                    >
+                      <X size={20} className="text-gray-400 hover:text-gray-600" />
+                    </button>
                   )}
                 </div>
 
-                {/* Content Preview or Full */}
-                <p
-                  className={`text-gray-600 text-sm mb-2 ${
-                    expandedId === announcement.id ? '' : 'line-clamp-2'
-                  }`}
-                >
-                  {locale === 'ar' ? announcement.content_ar : announcement.content}
-                </p>
+                {/* Content */}
+                <div className="mb-4">
+                  <p className={`text-gray-700 leading-relaxed ${!isExpanded && 'line-clamp-3'}`}>
+                    {locale === 'ar' ? announcement.content_ar : announcement.content}
+                  </p>
+                </div>
 
                 {/* Workshop Details */}
                 {announcement.type === 'workshop' && announcement.workshop_date && (
-                  <div className="bg-purple-50 rounded-lg p-3 mb-2 space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-purple-900">
-                      <Calendar size={16} />
-                      <span className="font-medium">
-                        {new Date(announcement.workshop_date).toLocaleDateString(
-                          locale === 'ar' ? 'ar-EG' : 'en-US',
-                          {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                          }
-                        )}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-purple-900">
-                      <Clock size={16} />
-                      <span>
-                        {new Date(announcement.workshop_date).toLocaleTimeString(
-                          locale === 'ar' ? 'ar-EG' : 'en-US',
-                          { hour: '2-digit', minute: '2-digit' }
-                        )}
-                      </span>
-                    </div>
-                    {announcement.workshop_location && (
-                      <div className="flex items-center gap-2 text-sm text-purple-900">
-                        <MapPin size={16} />
-                        <span>
-                          {locale === 'ar'
-                            ? announcement.workshop_location_ar
-                            : announcement.workshop_location}
-                        </span>
+                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 mb-4 border-2 border-purple-200">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-purple-200 rounded-lg">
+                          <Calendar size={18} className="text-purple-700" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-purple-600 font-medium">
+                            {locale === 'ar' ? 'التاريخ' : 'Date'}
+                          </p>
+                          <p className="text-sm text-purple-900 font-semibold">
+                            {new Date(announcement.workshop_date).toLocaleDateString(
+                              locale === 'ar' ? 'ar-EG' : 'en-US',
+                              { month: 'short', day: 'numeric', year: 'numeric' }
+                            )}
+                          </p>
+                        </div>
                       </div>
-                    )}
-                    {announcement.workshop_type && (
-                      <span className="inline-block px-2 py-1 bg-purple-200 text-purple-800 text-xs rounded">
-                        {announcement.workshop_type === 'online'
-                          ? locale === 'ar'
-                            ? 'عن بُعد'
-                            : 'Online'
-                          : announcement.workshop_type === 'in-person'
-                          ? locale === 'ar'
-                            ? 'حضوري'
-                            : 'In-Person'
-                          : locale === 'ar'
-                          ? 'مختلط'
-                          : 'Hybrid'}
-                      </span>
-                    )}
+
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-purple-200 rounded-lg">
+                          <Clock size={18} className="text-purple-700" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-purple-600 font-medium">
+                            {locale === 'ar' ? 'الوقت' : 'Time'}
+                          </p>
+                          <p className="text-sm text-purple-900 font-semibold">
+                            {new Date(announcement.workshop_date).toLocaleTimeString(
+                              locale === 'ar' ? 'ar-EG' : 'en-US',
+                              { hour: '2-digit', minute: '2-digit' }
+                            )}
+                          </p>
+                        </div>
+                      </div>
+
+                      {announcement.workshop_location && (
+                        <div className="flex items-center gap-3 md:col-span-2">
+                          <div className="p-2 bg-purple-200 rounded-lg">
+                            <MapPin size={18} className="text-purple-700" />
+                          </div>
+                          <div>
+                            <p className="text-xs text-purple-600 font-medium">
+                              {locale === 'ar' ? 'الموقع' : 'Location'}
+                            </p>
+                            <p className="text-sm text-purple-900 font-semibold">
+                              {locale === 'ar'
+                                ? announcement.workshop_location_ar
+                                : announcement.workshop_location}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {announcement.workshop_type && (
+                        <div className="md:col-span-2">
+                          <span className="inline-flex items-center px-3 py-1 bg-purple-600 text-white text-xs font-bold rounded-full">
+                            {announcement.workshop_type === 'online'
+                              ? locale === 'ar' ? '🌐 عن بُعد' : '🌐 Online'
+                              : announcement.workshop_type === 'in-person'
+                              ? locale === 'ar' ? '👥 حضوري' : '👥 In-Person'
+                              : locale === 'ar' ? '🔄 مختلط' : '🔄 Hybrid'}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
 
-                {/* Date */}
-                <div className="flex items-center gap-4 text-xs text-gray-500">
-                  <span>
+                {/* Footer */}
+                <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                  <span className="text-xs text-gray-500 flex items-center gap-1">
+                    <Clock size={14} />
                     {new Date(announcement.created_at).toLocaleDateString(
-                      locale === 'ar' ? 'ar-EG' : 'en-US'
+                      locale === 'ar' ? 'ar-EG' : 'en-US',
+                      { month: 'short', day: 'numeric' }
                     )}
                   </span>
-                  {expandedId !== announcement.id && (
-                    <button
-                      onClick={() => setExpandedId(announcement.id)}
-                      className="text-blue-600 hover:text-blue-700"
-                    >
-                      {locale === 'ar' ? 'عرض المزيد' : 'Show More'}
-                    </button>
-                  )}
-                  {expandedId === announcement.id && (
-                    <button
-                      onClick={() => setExpandedId(null)}
-                      className="text-blue-600 hover:text-blue-700"
-                    >
-                      {locale === 'ar' ? 'عرض أقل' : 'Show Less'}
-                    </button>
-                  )}
+
+                  <button
+                    onClick={() => setExpandedId(isExpanded ? null : announcement.id)}
+                    className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                  >
+                    {isExpanded ? (
+                      <>
+                        {locale === 'ar' ? 'عرض أقل' : 'Show Less'}
+                        <ChevronUp size={16} />
+                      </>
+                    ) : (
+                      <>
+                        {locale === 'ar' ? 'عرض المزيد' : 'Read More'}
+                        <ChevronDown size={16} />
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
-
-              {traineeId && (
-                <button
-                  onClick={() => markAsRead(announcement.id)}
-                  className="flex-shrink-0 text-gray-400 hover:text-gray-600"
-                  title={locale === 'ar' ? 'تحديد كمقروء' : 'Mark as read'}
-                >
-                  <X size={18} />
-                </button>
-              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
+      {/* View All Link */}
       {announcements.length > 5 && (
-        <div className="p-3 border-t border-gray-200 text-center">
-          <span className="text-sm text-gray-500">
+        <div className="bg-gray-50 p-4 text-center border-t border-gray-200">
+          <span className="text-sm text-gray-600 font-medium">
             {locale === 'ar'
-              ? `و ${announcements.length - 5} إعلانات أخرى`
-              : `and ${announcements.length - 5} more announcements`}
+              ? `+${announcements.length - 5} إعلانات أخرى`
+              : `+${announcements.length - 5} more announcements`}
           </span>
         </div>
       )}
