@@ -4,6 +4,7 @@ import { Metadata } from 'next';
 import DashboardLayout from '@/components/layout/dashboard-layout';
 import StatCard from '@/components/dashboard/stat-card';
 import OrphanedTraineesAlert from '@/components/admin/orphaned-trainees-alert';
+import AnnouncementsWidget from '@/components/announcements/announcements-widget';
 import { Users, Building2, UserCheck, FileText, ListTodo, TrendingUp } from 'lucide-react';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
@@ -88,6 +89,7 @@ export default async function DashboardPage({
     { count: pendingTasks },
     { data: recentReportsData },
     { data: upcomingTasksData },
+    { data: announcementsData },
   ] = await Promise.all([
     supabase.from('trainees').select('*', { count: 'exact', head: true }),
     supabase.from('trainees').select('*', { count: 'exact', head: true }).eq('status', 'active'),
@@ -119,6 +121,14 @@ export default async function DashboardPage({
       .gte('due_date', new Date().toISOString().split('T')[0])
       .order('due_date', { ascending: true })
       .limit(5),
+    // Fetch active announcements
+    supabase
+      .from('announcements')
+      .select('*')
+      .eq('is_active', true)
+      .order('is_pinned', { ascending: false })
+      .order('created_at', { ascending: false })
+      .limit(10),
   ]);
 
   // Transform recent reports into activities
@@ -223,6 +233,16 @@ export default async function DashboardPage({
             showAssignee={true}
           />
         </div>
+
+        {/* Announcements Section - Full Width */}
+        {announcementsData && announcementsData.length > 0 && (
+          <div className="mt-6">
+            <AnnouncementsWidget 
+              announcements={announcementsData} 
+              locale={locale}
+            />
+          </div>
+        )}
       </div>
     </DashboardLayout>
   );
