@@ -74,12 +74,12 @@ export default function AddAnnouncementForm({
       // Combine workshop date and time
       let workshopDateTime = null;
       if (formData.type === 'workshop' && formData.workshop_date) {
-        // Create ISO string without timezone conversion
-        // This ensures the time is stored exactly as entered
+        // Store as local datetime string (no timezone conversion)
+        // Display will parse it as-is without conversion
         if (formData.workshop_time) {
-          workshopDateTime = `${formData.workshop_date}T${formData.workshop_time}:00+02:00`; // Palestine timezone (UTC+2 winter time)
+          workshopDateTime = `${formData.workshop_date}T${formData.workshop_time}:00`;
         } else {
-          workshopDateTime = `${formData.workshop_date}T00:00:00+02:00`;
+          workshopDateTime = `${formData.workshop_date}T00:00:00`;
         }
       }
 

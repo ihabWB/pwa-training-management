@@ -224,15 +224,16 @@ export default function AnnouncementsWidget({
                             {locale === 'ar' ? 'التاريخ' : 'Date'}
                           </p>
                           <p className="text-sm text-purple-900 font-semibold">
-                            {new Date(announcement.workshop_date).toLocaleDateString(
-                              locale === 'ar' ? 'ar-EG' : 'en-US',
-                              { 
-                                month: 'short', 
-                                day: 'numeric', 
-                                year: 'numeric',
-                                timeZone: 'Asia/Jerusalem' // Palestine timezone
-                              }
-                            )}
+                            {(() => {
+                              // Parse as local time (no timezone conversion)
+                              const dateStr = announcement.workshop_date.split('T')[0];
+                              const [year, month, day] = dateStr.split('-');
+                              const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                              return date.toLocaleDateString(
+                                locale === 'ar' ? 'ar-EG' : 'en-US',
+                                { month: 'short', day: 'numeric', year: 'numeric' }
+                              );
+                            })()}
                           </p>
                         </div>
                       </div>
@@ -246,15 +247,20 @@ export default function AnnouncementsWidget({
                             {locale === 'ar' ? 'الوقت' : 'Time'}
                           </p>
                           <p className="text-sm text-purple-900 font-semibold">
-                            {new Date(announcement.workshop_date).toLocaleTimeString(
-                              locale === 'ar' ? 'ar-EG' : 'en-US',
-                              { 
-                                hour: '2-digit', 
-                                minute: '2-digit',
-                                timeZone: 'Asia/Jerusalem', // Palestine timezone
-                                hour12: true
-                              }
-                            )}
+                            {(() => {
+                              // Parse time as-is without timezone conversion
+                              const timeStr = announcement.workshop_date.split('T')[1];
+                              if (!timeStr) return '00:00';
+                              const [hours, minutes] = timeStr.split(':');
+                              const hour = parseInt(hours);
+                              const minute = minutes.substring(0, 2);
+                              
+                              // Format as 12-hour with AM/PM
+                              const period = hour >= 12 ? (locale === 'ar' ? 'م' : 'PM') : (locale === 'ar' ? 'ص' : 'AM');
+                              const hour12 = hour % 12 || 12;
+                              
+                              return `${hour12}:${minute} ${period}`;
+                            })()}
                           </p>
                         </div>
                       </div>
