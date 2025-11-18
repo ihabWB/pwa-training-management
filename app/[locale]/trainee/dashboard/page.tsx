@@ -133,20 +133,48 @@ export default async function TraineeDashboardPage({
       .select('*')
       .eq('trainee_id', trainee.id)
       .order('created_at', { ascending: false }),
-    supabase
-      .from('announcements')
-      .select('*')
-      .eq('is_active', true)
-      .or(`target_all.eq.true,announcement_recipients.trainee_id.eq.${trainee.id}`)
-      .order('is_pinned', { ascending: false })
-      .order('created_at', { ascending: false })
-      .limit(10),
   ]);
 
   const reports = reportsData || [];
   const tasks = tasksData || [];
   const evaluations = evaluationsData || [];
-  const announcements = announcementsData || [];
+
+  // Fetch announcements separately with proper logic
+  const { data: allAnnouncements } = await supabase
+    .from('announcements')
+    .select('*')
+    .eq('is_active', true)
+    .eq('target_all', true)
+    .order('is_pinned', { ascending: false })
+    .order('created_at', { ascending: false });
+
+  const { data: targetedAnnouncements } = await supabase
+    .from('announcement_recipients')
+    .select(`
+      announcement_id,
+      announcements!inner (*)
+    `)
+    .eq('trainee_id', trainee.id)
+    .eq('announcements.is_active', true);
+
+  // Combine both announcement types
+  const targetedAnnouncementsData = (targetedAnnouncements || []).map((r: any) => r.announcements);
+  const combinedAnnouncements = [...(allAnnouncements || []), ...targetedAnnouncementsData];
+  
+  // Remove duplicates and sort
+  const uniqueAnnouncementsMap = new Map();
+  combinedAnnouncements.forEach((a: any) => {
+    if (!uniqueAnnouncementsMap.has(a.id)) {
+      uniqueAnnouncementsMap.set(a.id, a);
+    }
+  });
+  
+  const announcements = Array.from(uniqueAnnouncementsMap.values())
+    .sort((a: any, b: any) => {
+      if (a.is_pinned !== b.is_pinned) return b.is_pinned ? 1 : -1;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    })
+    .slice(0, 10);
 
   // Calculate statistics
   const pendingReports = reports.filter((r) => r.status === 'pending').length;
