@@ -63,6 +63,14 @@ export default function AddAnnouncementForm({
         return;
       }
 
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        alert(locale === 'ar' ? 'خطأ في المصادقة' : 'Authentication error');
+        setLoading(false);
+        return;
+      }
+
       // Combine workshop date and time
       let workshopDateTime = null;
       if (formData.type === 'workshop' && formData.workshop_date) {
@@ -88,6 +96,7 @@ export default function AddAnnouncementForm({
           workshop_location_ar: formData.type === 'workshop' ? formData.workshop_location_ar : null,
           expires_at: formData.expires_at || null,
           is_pinned: formData.is_pinned,
+          created_by: user.id,
         })
         .select()
         .single();
