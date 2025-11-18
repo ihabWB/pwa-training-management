@@ -7,6 +7,7 @@ import TraineeReportsTable from '@/components/trainee/trainee-reports-table';
 import TraineeTasksTable from '@/components/trainee/trainee-tasks-table';
 import TraineeEvaluationsTable from '@/components/trainee/trainee-evaluations-table';
 import TraineeProfileCard from '@/components/trainee/trainee-profile-card';
+import AnnouncementsWidget from '@/components/announcements/announcements-widget';
 
 export default async function TraineeDashboardPage({
   params,
@@ -115,6 +116,7 @@ export default async function TraineeDashboardPage({
     { data: reportsData },
     { data: tasksData },
     { data: evaluationsData },
+    { data: announcementsData },
   ] = await Promise.all([
     supabase
       .from('reports')
@@ -131,11 +133,20 @@ export default async function TraineeDashboardPage({
       .select('*')
       .eq('trainee_id', trainee.id)
       .order('created_at', { ascending: false }),
+    supabase
+      .from('announcements')
+      .select('*')
+      .eq('is_active', true)
+      .or(`target_all.eq.true,announcement_recipients.trainee_id.eq.${trainee.id}`)
+      .order('is_pinned', { ascending: false })
+      .order('created_at', { ascending: false })
+      .limit(10),
   ]);
 
   const reports = reportsData || [];
   const tasks = tasksData || [];
   const evaluations = evaluationsData || [];
+  const announcements = announcementsData || [];
 
   // Calculate statistics
   const pendingReports = reports.filter((r) => r.status === 'pending').length;
@@ -187,6 +198,15 @@ export default async function TraineeDashboardPage({
           locale={locale}
           progressPercentage={progressPercentage}
         />
+
+        {/* Announcements Widget */}
+        {announcements.length > 0 && (
+          <AnnouncementsWidget
+            announcements={announcements}
+            locale={locale}
+            traineeId={trainee.id}
+          />
+        )}
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -14,6 +14,7 @@ import {
 import SupervisorTraineesList from '@/components/supervisor/supervisor-trainees-list';
 import SupervisorPendingReports from '@/components/supervisor/supervisor-pending-reports';
 import SupervisorRecentEvaluations from '@/components/supervisor/supervisor-recent-evaluations';
+import AnnouncementsWidget from '@/components/announcements/announcements-widget';
 
 export default async function SupervisorDashboardPage({
   params: { locale },
@@ -163,6 +164,17 @@ export default async function SupervisorDashboardPage({
     .gte('evaluation_date', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString());
   const thisMonthEvaluations = thisMonthEvaluationsData.data?.length || 0;
 
+  // Fetch announcements for supervisor's trainees
+  const { data: announcementsData } = await supabase
+    .from('announcements')
+    .select('*')
+    .eq('is_active', true)
+    .order('is_pinned', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(10);
+
+  const announcements = announcementsData || [];
+
   const t = {
     ar: {
       supervisorDashboard: 'لوحة تحكم المشرف',
@@ -240,6 +252,14 @@ export default async function SupervisorDashboardPage({
             icon={TrendingUp}
           />
         </div>
+
+        {/* Announcements Widget */}
+        {announcements.length > 0 && (
+          <AnnouncementsWidget
+            announcements={announcements}
+            locale={locale}
+          />
+        )}
 
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
