@@ -77,9 +77,9 @@ export default function AddAnnouncementForm({
         // Create ISO string without timezone conversion
         // This ensures the time is stored exactly as entered
         if (formData.workshop_time) {
-          workshopDateTime = `${formData.workshop_date}T${formData.workshop_time}:00+03:00`; // Palestine timezone (UTC+3)
+          workshopDateTime = `${formData.workshop_date}T${formData.workshop_time}:00+02:00`; // Palestine timezone (UTC+2 winter time)
         } else {
-          workshopDateTime = `${formData.workshop_date}T00:00:00+03:00`;
+          workshopDateTime = `${formData.workshop_date}T00:00:00+02:00`;
         }
       }
 
