@@ -116,7 +116,6 @@ export default async function TraineeDashboardPage({
     { data: reportsData },
     { data: tasksData },
     { data: evaluationsData },
-    { data: announcementsData },
   ] = await Promise.all([
     supabase
       .from('reports')
