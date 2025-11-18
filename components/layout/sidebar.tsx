@@ -67,6 +67,7 @@ export default function Sidebar({
 
   const adminMenu = [
     { icon: LayoutDashboard, label: t('dashboard'), href: `/${locale}/dashboard` },
+    { icon: Bell, label: t('announcements'), href: `/${locale}/announcements` },
     { icon: Users, label: t('trainees'), href: `/${locale}/trainees` },
     { icon: UserCheck, label: t('supervisors'), href: `/${locale}/supervisors` },
     { icon: Building2, label: t('institutions'), href: `/${locale}/institutions` },
