@@ -226,7 +226,12 @@ export default function AnnouncementsWidget({
                           <p className="text-sm text-purple-900 font-semibold">
                             {new Date(announcement.workshop_date).toLocaleDateString(
                               locale === 'ar' ? 'ar-EG' : 'en-US',
-                              { month: 'short', day: 'numeric', year: 'numeric' }
+                              { 
+                                month: 'short', 
+                                day: 'numeric', 
+                                year: 'numeric',
+                                timeZone: 'Asia/Jerusalem' // Palestine timezone
+                              }
                             )}
                           </p>
                         </div>
@@ -243,7 +248,12 @@ export default function AnnouncementsWidget({
                           <p className="text-sm text-purple-900 font-semibold">
                             {new Date(announcement.workshop_date).toLocaleTimeString(
                               locale === 'ar' ? 'ar-EG' : 'en-US',
-                              { hour: '2-digit', minute: '2-digit' }
+                              { 
+                                hour: '2-digit', 
+                                minute: '2-digit',
+                                timeZone: 'Asia/Jerusalem', // Palestine timezone
+                                hour12: true
+                              }
                             )}
                           </p>
                         </div>
