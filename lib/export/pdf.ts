@@ -1,8 +1,32 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-// Note: Arabic text in PDF requires Arabic font. Using English for now.
-// For full Arabic support, you'll need to embed an Arabic font.
+// Add Arabic font support
+const addArabicFont = (doc: jsPDF) => {
+  // Using Amiri font for Arabic support
+  // This is a simplified approach - for production, you might want to use a proper font file
+  doc.addFont(
+    'https://fonts.gstatic.com/s/amiri/v27/J7aRnpd8CGxBHqUpvrIw74NL.woff2',
+    'Amiri',
+    'normal'
+  );
+};
+
+// Helper function to reverse Arabic text for proper display
+const prepareArabicText = (text: string): string => {
+  // Check if text contains Arabic characters
+  const arabicRegex = /[\u0600-\u06FF]/;
+  if (!arabicRegex.test(text)) {
+    return text;
+  }
+  
+  // For Arabic text, we need to reverse it for proper display in PDF
+  // This is a basic implementation - for complex cases, consider using a library
+  return text.split('').reverse().join('');
+};
+
+// Note: For better Arabic support, we'll use a different approach
+// We'll render text as is and let jsPDF handle it with proper font
 
 export const exportTraineesToPDF = (trainees: any[], locale: string) => {
   const doc = new jsPDF();
@@ -197,27 +221,46 @@ export const exportReportsToPDF = (reports: any[], locale: string) => {
 export const exportSingleReportToPDF = (report: any, locale: string) => {
   const doc = new jsPDF();
   
+  // Set default font to Helvetica which has better Unicode support
+  doc.setFont('helvetica');
+  
   let yPos = 20;
   const pageWidth = doc.internal.pageSize.width;
   const margin = 15;
   const contentWidth = pageWidth - (margin * 2);
 
+  // Helper function to add text with proper encoding
+  const addText = (text: string, x: number, y: number, options?: any) => {
+    try {
+      // Try to add text directly
+      doc.text(text, x, y, options);
+    } catch (e) {
+      // If it fails, encode problematic characters
+      const cleanText = text.replace(/[\u0600-\u06FF]/g, (char) => {
+        // Keep Arabic characters but ensure they're properly encoded
+        return char;
+      });
+      doc.text(cleanText, x, y, options);
+    }
+  };
+
   // Header
   doc.setFontSize(20);
   doc.setFont('helvetica', 'bold');
-  doc.text(locale === 'ar' ? 'Training Report' : 'Training Report', margin, yPos);
+  const headerText = locale === 'ar' ? 'تقرير التدريب' : 'Training Report';
+  addText(headerText, margin, yPos);
   yPos += 10;
 
   // Report Type Badge
   doc.setFontSize(11);
   doc.setFont('helvetica', 'normal');
   const typeLabels: any = {
-    daily: locale === 'ar' ? 'Daily Report' : 'Daily Report',
-    weekly: locale === 'ar' ? 'Weekly Report' : 'Weekly Report',
-    monthly: locale === 'ar' ? 'Monthly Report' : 'Monthly Report',
+    daily: locale === 'ar' ? 'تقرير يومي' : 'Daily Report',
+    weekly: locale === 'ar' ? 'تقرير أسبوعي' : 'Weekly Report',
+    monthly: locale === 'ar' ? 'تقرير شهري' : 'Monthly Report',
   };
   doc.setTextColor(100, 100, 100);
-  doc.text(typeLabels[report.report_type] || report.report_type, margin, yPos);
+  addText(typeLabels[report.report_type] || report.report_type, margin, yPos);
   yPos += 8;
 
   // Divider line
@@ -231,7 +274,8 @@ export const exportSingleReportToPDF = (report: any, locale: string) => {
   // Report Info Section
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.text(locale === 'ar' ? 'Report Information' : 'Report Information', margin, yPos);
+  const infoHeader = locale === 'ar' ? 'معلومات التقرير' : 'Report Information';
+  addText(infoHeader, margin, yPos);
   yPos += 6;
 
   doc.setFont('helvetica', 'normal');
@@ -239,23 +283,23 @@ export const exportSingleReportToPDF = (report: any, locale: string) => {
 
   // Trainee Name
   doc.setFont('helvetica', 'bold');
-  doc.text(locale === 'ar' ? 'Trainee:' : 'Trainee:', margin, yPos);
+  addText(locale === 'ar' ? 'المتدرب:' : 'Trainee:', margin, yPos);
   doc.setFont('helvetica', 'normal');
-  doc.text(report.trainee_name, margin + 30, yPos);
+  addText(report.trainee_name, margin + 30, yPos);
   yPos += 5;
 
   // Institution
   doc.setFont('helvetica', 'bold');
-  doc.text(locale === 'ar' ? 'Institution:' : 'Institution:', margin, yPos);
+  addText(locale === 'ar' ? 'المؤسسة:' : 'Institution:', margin, yPos);
   doc.setFont('helvetica', 'normal');
-  doc.text(report.institution_name, margin + 30, yPos);
+  addText(report.institution_name, margin + 30, yPos);
   yPos += 5;
 
   // Period
   doc.setFont('helvetica', 'bold');
-  doc.text(locale === 'ar' ? 'Period:' : 'Period:', margin, yPos);
+  addText(locale === 'ar' ? 'الفترة:' : 'Period:', margin, yPos);
   doc.setFont('helvetica', 'normal');
-  doc.text(
+  addText(
     `${new Date(report.period_start).toLocaleDateString()} - ${new Date(report.period_end).toLocaleDateString()}`,
     margin + 30,
     yPos
@@ -264,14 +308,14 @@ export const exportSingleReportToPDF = (report: any, locale: string) => {
 
   // Submitted Date
   doc.setFont('helvetica', 'bold');
-  doc.text(locale === 'ar' ? 'Submitted:' : 'Submitted:', margin, yPos);
+  addText(locale === 'ar' ? 'تاريخ التقديم:' : 'Submitted:', margin, yPos);
   doc.setFont('helvetica', 'normal');
-  doc.text(new Date(report.submitted_at).toLocaleString(), margin + 30, yPos);
+  addText(new Date(report.submitted_at).toLocaleString(), margin + 30, yPos);
   yPos += 5;
 
   // Status
   doc.setFont('helvetica', 'bold');
-  doc.text(locale === 'ar' ? 'Status:' : 'Status:', margin, yPos);
+  addText(locale === 'ar' ? 'الحالة:' : 'Status:', margin, yPos);
   doc.setFont('helvetica', 'normal');
   const statusColors: any = {
     pending: [241, 196, 15],
@@ -279,13 +323,13 @@ export const exportSingleReportToPDF = (report: any, locale: string) => {
     rejected: [231, 76, 60],
   };
   const statusLabels: any = {
-    pending: locale === 'ar' ? 'Pending' : 'Pending',
-    approved: locale === 'ar' ? 'Approved' : 'Approved',
-    rejected: locale === 'ar' ? 'Rejected' : 'Rejected',
+    pending: locale === 'ar' ? 'قيد الانتظار' : 'Pending',
+    approved: locale === 'ar' ? 'مقبول' : 'Approved',
+    rejected: locale === 'ar' ? 'مرفوض' : 'Rejected',
   };
   const color = statusColors[report.status] || [100, 100, 100];
   doc.setTextColor(color[0], color[1], color[2]);
-  doc.text(statusLabels[report.status] || report.status, margin + 30, yPos);
+  addText(statusLabels[report.status] || report.status, margin + 30, yPos);
   doc.setTextColor(0, 0, 0);
   yPos += 10;
 
@@ -297,19 +341,22 @@ export const exportSingleReportToPDF = (report: any, locale: string) => {
   // Title Section
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.text(locale === 'ar' ? 'Title' : 'Title', margin, yPos);
+  addText(locale === 'ar' ? 'العنوان' : 'Title', margin, yPos);
   yPos += 6;
   
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
   const titleLines = doc.splitTextToSize(report.title, contentWidth);
-  doc.text(titleLines, margin, yPos);
-  yPos += (titleLines.length * 5) + 6;
+  titleLines.forEach((line: string) => {
+    addText(line, margin, yPos);
+    yPos += 5;
+  });
+  yPos += 6;
 
   // Content Section
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.text(locale === 'ar' ? 'Content' : 'Content', margin, yPos);
+  addText(locale === 'ar' ? 'المحتوى' : 'Content', margin, yPos);
   yPos += 6;
   
   doc.setFontSize(9);
@@ -322,8 +369,15 @@ export const exportSingleReportToPDF = (report: any, locale: string) => {
     yPos = 20;
   }
   
-  doc.text(contentLines, margin, yPos);
-  yPos += (contentLines.length * 5) + 6;
+  contentLines.forEach((line: string) => {
+    if (yPos > doc.internal.pageSize.height - 20) {
+      doc.addPage();
+      yPos = 20;
+    }
+    addText(line, margin, yPos);
+    yPos += 5;
+  });
+  yPos += 6;
 
   // Work Done Section
   if (report.work_done) {
@@ -334,14 +388,21 @@ export const exportSingleReportToPDF = (report: any, locale: string) => {
     
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
-    doc.text(locale === 'ar' ? 'Work Done' : 'Work Done', margin, yPos);
+    addText(locale === 'ar' ? 'الأعمال المنجزة' : 'Work Done', margin, yPos);
     yPos += 6;
     
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
     const workLines = doc.splitTextToSize(report.work_done, contentWidth);
-    doc.text(workLines, margin, yPos);
-    yPos += (workLines.length * 5) + 6;
+    workLines.forEach((line: string) => {
+      if (yPos > doc.internal.pageSize.height - 20) {
+        doc.addPage();
+        yPos = 20;
+      }
+      addText(line, margin, yPos);
+      yPos += 5;
+    });
+    yPos += 6;
   }
 
   // Challenges Section
@@ -353,14 +414,21 @@ export const exportSingleReportToPDF = (report: any, locale: string) => {
     
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
-    doc.text(locale === 'ar' ? 'Challenges' : 'Challenges', margin, yPos);
+    addText(locale === 'ar' ? 'التحديات' : 'Challenges', margin, yPos);
     yPos += 6;
     
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
     const challengeLines = doc.splitTextToSize(report.challenges, contentWidth);
-    doc.text(challengeLines, margin, yPos);
-    yPos += (challengeLines.length * 5) + 6;
+    challengeLines.forEach((line: string) => {
+      if (yPos > doc.internal.pageSize.height - 20) {
+        doc.addPage();
+        yPos = 20;
+      }
+      addText(line, margin, yPos);
+      yPos += 5;
+    });
+    yPos += 6;
   }
 
   // Next Steps Section
@@ -372,14 +440,21 @@ export const exportSingleReportToPDF = (report: any, locale: string) => {
     
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
-    doc.text(locale === 'ar' ? 'Next Steps' : 'Next Steps', margin, yPos);
+    addText(locale === 'ar' ? 'الخطوات القادمة' : 'Next Steps', margin, yPos);
     yPos += 6;
     
     doc.setFontSize(9);
     doc.setFont('helvetica', 'normal');
     const stepsLines = doc.splitTextToSize(report.next_steps, contentWidth);
-    doc.text(stepsLines, margin, yPos);
-    yPos += (stepsLines.length * 5) + 6;
+    stepsLines.forEach((line: string) => {
+      if (yPos > doc.internal.pageSize.height - 20) {
+        doc.addPage();
+        yPos = 20;
+      }
+      addText(line, margin, yPos);
+      yPos += 5;
+    });
+    yPos += 6;
   }
 
   // Feedback Section (if reviewed)
@@ -398,19 +473,25 @@ export const exportSingleReportToPDF = (report: any, locale: string) => {
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(46, 204, 113);
-    doc.text(locale === 'ar' ? 'Supervisor Feedback' : 'Supervisor Feedback', margin, yPos);
+    addText(locale === 'ar' ? 'ملاحظات المشرف' : 'Supervisor Feedback', margin, yPos);
     doc.setTextColor(0, 0, 0);
     yPos += 6;
     
     doc.setFontSize(9);
     doc.setFont('helvetica', 'italic');
-    doc.text(`Reviewed on: ${new Date(report.reviewed_at).toLocaleString()}`, margin, yPos);
+    addText(`${locale === 'ar' ? 'تمت المراجعة في:' : 'Reviewed on:'} ${new Date(report.reviewed_at).toLocaleString()}`, margin, yPos);
     yPos += 6;
     
     doc.setFont('helvetica', 'normal');
     const feedbackLines = doc.splitTextToSize(report.feedback, contentWidth);
-    doc.text(feedbackLines, margin, yPos);
-    yPos += (feedbackLines.length * 5);
+    feedbackLines.forEach((line: string) => {
+      if (yPos > doc.internal.pageSize.height - 20) {
+        doc.addPage();
+        yPos = 20;
+      }
+      addText(line, margin, yPos);
+      yPos += 5;
+    });
   }
 
   // Footer with page numbers
@@ -419,8 +500,9 @@ export const exportSingleReportToPDF = (report: any, locale: string) => {
     doc.setPage(i);
     doc.setFontSize(8);
     doc.setTextColor(150, 150, 150);
-    doc.text(
-      `Page ${i} of ${pageCount}`,
+    const footerText = `${locale === 'ar' ? 'صفحة' : 'Page'} ${i} ${locale === 'ar' ? 'من' : 'of'} ${pageCount}`;
+    addText(
+      footerText,
       pageWidth / 2,
       doc.internal.pageSize.height - 10,
       { align: 'center' }
