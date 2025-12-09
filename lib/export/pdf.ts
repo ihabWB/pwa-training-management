@@ -1,32 +1,9 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { exportSingleReportToPDFWithArabic } from './pdf-arabic';
 
-// Add Arabic font support
-const addArabicFont = (doc: jsPDF) => {
-  // Using Amiri font for Arabic support
-  // This is a simplified approach - for production, you might want to use a proper font file
-  doc.addFont(
-    'https://fonts.gstatic.com/s/amiri/v27/J7aRnpd8CGxBHqUpvrIw74NL.woff2',
-    'Amiri',
-    'normal'
-  );
-};
-
-// Helper function to reverse Arabic text for proper display
-const prepareArabicText = (text: string): string => {
-  // Check if text contains Arabic characters
-  const arabicRegex = /[\u0600-\u06FF]/;
-  if (!arabicRegex.test(text)) {
-    return text;
-  }
-  
-  // For Arabic text, we need to reverse it for proper display in PDF
-  // This is a basic implementation - for complex cases, consider using a library
-  return text.split('').reverse().join('');
-};
-
-// Note: For better Arabic support, we'll use a different approach
-// We'll render text as is and let jsPDF handle it with proper font
+// Export the Arabic-friendly version as the main export
+export { exportSingleReportToPDFWithArabic } from './pdf-arabic';
 
 export const exportTraineesToPDF = (trainees: any[], locale: string) => {
   const doc = new jsPDF();

@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import ReviewReportDialog from './review-report-dialog';
 import { exportReportsToExcel } from '@/lib/export/excel';
-import { exportReportsToPDF, exportSingleReportToPDF } from '@/lib/export/pdf';
+import { exportReportsToPDF, exportSingleReportToPDFWithArabic } from '@/lib/export/pdf';
 
 interface Report {
   id: string;
@@ -254,7 +254,7 @@ export default function ReportsTable({
                         </button>
                         {(userRole === 'admin' || userRole === 'supervisor') && (
                           <button
-                            onClick={() => exportSingleReportToPDF(report, locale)}
+                            onClick={() => exportSingleReportToPDFWithArabic(report, locale)}
                             className="text-white bg-red-600 hover:bg-red-700 flex items-center gap-1 px-3 py-1 rounded shadow-sm hover:shadow transition-all"
                             title={locale === 'ar' ? 'تصدير التقرير كملف PDF' : 'Export Report as PDF'}
                           >

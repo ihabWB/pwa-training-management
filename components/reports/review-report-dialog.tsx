@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { createClient } from '@/lib/supabase/client';
-import { exportSingleReportToPDF } from '@/lib/export/pdf';
+import { exportSingleReportToPDFWithArabic } from '@/lib/export/pdf';
 
 interface Report {
   id: string;
@@ -132,7 +132,7 @@ export default function ReviewReportDialog({
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => exportSingleReportToPDF(report, locale)}
+              onClick={() => exportSingleReportToPDFWithArabic(report, locale)}
               className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm"
               title={locale === 'ar' ? 'تصدير التقرير كملف PDF' : 'Export Report as PDF'}
             >
