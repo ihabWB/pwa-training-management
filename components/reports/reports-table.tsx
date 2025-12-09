@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import ReviewReportDialog from './review-report-dialog';
 import { exportReportsToExcel } from '@/lib/export/excel';
-import { exportReportsToPDF } from '@/lib/export/pdf';
+import { exportReportsToPDF, exportSingleReportToPDF } from '@/lib/export/pdf';
 
 interface Report {
   id: string;
@@ -243,13 +243,26 @@ export default function ReportsTable({
                       {new Date(report.submitted_at).toLocaleDateString(locale)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => openReviewDialog(report)}
-                        className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
-                      >
-                        <Eye size={18} />
-                        {locale === 'ar' ? 'عرض' : 'View'}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => openReviewDialog(report)}
+                          className="text-blue-600 hover:text-blue-900 flex items-center gap-1 px-2 py-1 rounded hover:bg-blue-50 transition-colors"
+                          title={locale === 'ar' ? 'عرض التفاصيل' : 'View Details'}
+                        >
+                          <Eye size={18} />
+                          {locale === 'ar' ? 'عرض' : 'View'}
+                        </button>
+                        {(userRole === 'admin' || userRole === 'supervisor') && (
+                          <button
+                            onClick={() => exportSingleReportToPDF(report, locale)}
+                            className="text-white bg-red-600 hover:bg-red-700 flex items-center gap-1 px-3 py-1 rounded shadow-sm hover:shadow transition-all"
+                            title={locale === 'ar' ? 'تصدير التقرير كملف PDF' : 'Export Report as PDF'}
+                          >
+                            <FileDown size={18} />
+                            {locale === 'ar' ? 'تصدير PDF' : 'Export PDF'}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))

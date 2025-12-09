@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { X, Loader2, Check, XCircle } from 'lucide-react';
+import { X, Loader2, Check, XCircle, FileDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { createClient } from '@/lib/supabase/client';
+import { exportSingleReportToPDF } from '@/lib/export/pdf';
 
 interface Report {
   id: string;
@@ -129,12 +130,24 @@ export default function ReviewReportDialog({
               {new Date(report.period_end).toLocaleDateString(locale)}
             </p>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <X size={24} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => exportSingleReportToPDF(report, locale)}
+              className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm"
+              title={locale === 'ar' ? 'تصدير التقرير كملف PDF' : 'Export Report as PDF'}
+            >
+              <FileDown size={18} />
+              <span className="text-sm font-medium">
+                {locale === 'ar' ? 'تصدير PDF' : 'Export PDF'}
+              </span>
+            </button>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X size={24} />
+            </button>
+          </div>
         </div>
 
         {/* Content */}
