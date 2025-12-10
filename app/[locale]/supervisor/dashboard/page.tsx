@@ -16,11 +16,10 @@ import SupervisorPendingReports from '@/components/supervisor/supervisor-pending
 import SupervisorRecentEvaluations from '@/components/supervisor/supervisor-recent-evaluations';
 import AnnouncementsWidget from '@/components/announcements/announcements-widget';
 
-export default async function SupervisorDashboardPage({
-  params: { locale },
-}: {
-  params: { locale: string };
+export default async function SupervisorDashboardPage(props: {
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await props.params;
   const cookieStore = await cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

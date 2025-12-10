@@ -4,11 +4,10 @@ import AdminAttendanceView from '@/components/attendance/admin-attendance-view';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { Calendar, Clock, CheckCircle, XCircle, Users } from 'lucide-react';
 
-export default async function AttendancePage({
-  params,
-}: {
-  params: { locale: string };
+export default async function AttendancePage(props: {
+  params: Promise<{ locale: string }>;
 }) {
+  const params = await props.params;
   const supabase = await createServerSupabaseClient();
 
   // Check authentication

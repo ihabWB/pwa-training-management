@@ -21,11 +21,10 @@ const ReportsTable = dynamic(() => import('@/components/reports/reports-table'),
 // إعادة التحقق من البيانات كل 30 ثانية (التقارير تتغير بسرعة)
 export const revalidate = 30;
 
-export default async function ReportsPage({
-  params,
-}: {
-  params: { locale: string };
+export default async function ReportsPage(props: {
+  params: Promise<{ locale: string }>;
 }) {
+  const params = await props.params;
   const supabase = await createServerSupabaseClient();
 
   // Check authentication

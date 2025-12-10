@@ -4,11 +4,10 @@ import SupervisorAttendanceReview from '@/components/attendance/supervisor-atten
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { Calendar, Clock, CheckCircle, XCircle } from 'lucide-react';
 
-export default async function SupervisorAttendancePage({
-  params,
-}: {
-  params: { locale: string };
+export default async function SupervisorAttendancePage(props: {
+  params: Promise<{ locale: string }>;
 }) {
+  const params = await props.params;
   const supabase = await createServerSupabaseClient();
 
   // Check authentication

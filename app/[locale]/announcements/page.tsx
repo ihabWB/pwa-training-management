@@ -5,11 +5,10 @@ import { Bell, Plus, Calendar, Users, Megaphone } from 'lucide-react';
 import Link from 'next/link';
 import AnnouncementsList from '@/components/announcements/announcements-list';
 
-export default async function AnnouncementsPage({
-  params,
-}: {
-  params: { locale: string };
+export default async function AnnouncementsPage(props: {
+  params: Promise<{ locale: string }>;
 }) {
+  const params = await props.params;
   const supabase = await createServerSupabaseClient();
 
   // Check authentication

@@ -1,11 +1,10 @@
 import { redirect } from 'next/navigation';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
-export default async function LocaleIndexPage({
-  params: { locale },
-}: {
-  params: { locale: string };
+export default async function LocaleIndexPage(props: {
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await props.params;
   const supabase = await createServerSupabaseClient();
 
   const {

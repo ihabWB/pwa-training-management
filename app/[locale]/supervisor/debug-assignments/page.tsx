@@ -1,11 +1,10 @@
 import { redirect } from 'next/navigation';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 
-export default async function DebugAssignmentsPage({
-  params,
-}: {
-  params: { locale: string };
+export default async function DebugAssignmentsPage(props: {
+  params: Promise<{ locale: string }>;
 }) {
+  const params = await props.params;
   const supabase = await createServerSupabaseClient();
 
   const {

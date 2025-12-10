@@ -4,11 +4,10 @@ import EvaluationsTable from '@/components/evaluations/evaluations-table';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { Award, TrendingUp, Users, Calendar } from 'lucide-react';
 
-export default async function EvaluationsPage({
-  params,
-}: {
-  params: { locale: string };
+export default async function EvaluationsPage(props: {
+  params: Promise<{ locale: string }>;
 }) {
+  const params = await props.params;
   const supabase = await createServerSupabaseClient();
 
   // Check authentication

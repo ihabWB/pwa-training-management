@@ -20,11 +20,10 @@ const InstitutionsTable = dynamic(() => import('@/components/institutions/instit
 // إعادة التحقق من البيانات كل 60 ثانية
 export const revalidate = 60;
 
-export default async function InstitutionsPage({
-  params,
-}: {
-  params: { locale: string };
+export default async function InstitutionsPage(props: {
+  params: Promise<{ locale: string }>;
 }) {
+  const params = await props.params;
   const supabase = await createServerSupabaseClient();
 
   // Check authentication

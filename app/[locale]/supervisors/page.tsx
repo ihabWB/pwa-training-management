@@ -20,11 +20,10 @@ const SupervisorsTable = dynamic(() => import('@/components/supervisors/supervis
 // إعادة التحقق من البيانات كل 60 ثانية
 export const revalidate = 60;
 
-export default async function SupervisorsPage({
-  params,
-}: {
-  params: { locale: string };
+export default async function SupervisorsPage(props: {
+  params: Promise<{ locale: string }>;
 }) {
+  const params = await props.params;
   const supabase = await createServerSupabaseClient();
 
   // Check authentication

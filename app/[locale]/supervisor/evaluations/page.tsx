@@ -2,11 +2,10 @@ import { redirect } from 'next/navigation';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import SupervisorEvaluationsList from '@/components/supervisor/supervisor-evaluations-list';
 
-export default async function SupervisorEvaluationsPage({
-  params,
-}: {
-  params: { locale: string };
+export default async function SupervisorEvaluationsPage(props: {
+  params: Promise<{ locale: string }>;
 }) {
+  const params = await props.params;
   const supabase = await createServerSupabaseClient();
 
   const {

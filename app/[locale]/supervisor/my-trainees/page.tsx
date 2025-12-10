@@ -6,11 +6,10 @@ import SupervisorTraineesList from '@/components/supervisor/supervisor-trainees-
 
 export const revalidate = 30;
 
-export default async function MyTraineesPage({
-  params: { locale },
-}: {
-  params: { locale: string };
+export default async function MyTraineesPage(props: {
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await props.params;
   const cookieStore = await cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

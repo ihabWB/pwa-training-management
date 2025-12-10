@@ -4,11 +4,10 @@ import TasksTable from '@/components/tasks/tasks-table';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { ListTodo, Clock, CheckCircle, XCircle } from 'lucide-react';
 
-export default async function TasksPage({
-  params,
-}: {
-  params: { locale: string };
+export default async function TasksPage(props: {
+  params: Promise<{ locale: string }>;
 }) {
+  const params = await props.params;
   const supabase = await createServerSupabaseClient();
 
   // Check authentication

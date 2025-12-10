@@ -3,11 +3,10 @@ import DashboardLayout from '@/components/layout/dashboard-layout';
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import AddAnnouncementForm from '@/components/announcements/add-announcement-form';
 
-export default async function NewAnnouncementPage({
-  params,
-}: {
-  params: { locale: string };
+export default async function NewAnnouncementPage(props: {
+  params: Promise<{ locale: string }>;
 }) {
+  const params = await props.params;
   const supabase = await createServerSupabaseClient();
 
   // Check authentication

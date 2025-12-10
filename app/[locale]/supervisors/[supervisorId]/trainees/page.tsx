@@ -5,11 +5,10 @@ import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { Award, User, Calendar, TrendingUp } from 'lucide-react';
 import SupervisorTraineesTable from '@/components/supervisors/supervisor-trainees-table';
 
-export default async function SupervisorTraineesPage({
-  params,
-}: {
-  params: { locale: string; supervisorId: string };
+export default async function SupervisorTraineesPage(props: {
+  params: Promise<{ locale: string; supervisorId: string }>;
 }) {
+  const params = await props.params;
   const supabase = await createServerSupabaseClient();
 
   // Check authentication

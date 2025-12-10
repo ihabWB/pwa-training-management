@@ -5,11 +5,10 @@ import TraineeAttendanceHistory from '@/components/attendance/trainee-attendance
 import { createServerSupabaseClient } from '@/lib/supabase/server';
 import { Calendar, CheckCircle, XCircle, Clock } from 'lucide-react';
 
-export default async function TraineeAttendancePage({
-  params,
-}: {
-  params: { locale: string };
+export default async function TraineeAttendancePage(props: {
+  params: Promise<{ locale: string }>;
 }) {
+  const params = await props.params;
   const supabase = await createServerSupabaseClient();
 
   // Check authentication

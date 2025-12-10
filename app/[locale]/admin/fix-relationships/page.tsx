@@ -3,11 +3,10 @@ import { redirect } from 'next/navigation';
 import { createServerClient } from '@supabase/ssr';
 import DashboardLayout from '@/components/layout/dashboard-layout';
 
-export default async function FixRelationshipsPage({
-  params: { locale },
-}: {
-  params: { locale: string };
+export default async function FixRelationshipsPage(props: {
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await props.params;
   const cookieStore = await cookies();
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
