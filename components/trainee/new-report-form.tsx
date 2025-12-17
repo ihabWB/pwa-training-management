@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { ensureValidSession, isAuthError, getAuthErrorMessage } from '@/lib/supabase/session-handler';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
@@ -65,7 +66,29 @@ export default function NewReportForm({ traineeId, locale }: NewReportFormProps)
     try {
       const supabase = createClient();
       
-      const { error: insertError } = await supabase
+      // Check and refresh session if needed
+      console.log('Checking session before submit...');
+      const sessionValid = await ensureValidSession(supabase);
+      
+      if (!sessionValid) {
+        console.error('Session is invalid or expired');
+        setError(locale === 'ar' 
+          ? 'انتهت صلاحية الجلسة. سيتم تحويلك إلى صفحة تسجيل الدخول...' 
+          : 'Session expired. Redirecting to login...');
+        
+        // Save current form data before redirecting
+        localStorage.setItem('draft_report', JSON.stringify(formData));
+        localStorage.setItem('return_url', window.location.pathname);
+        
+        setTimeout(() => {
+          window.location.href = `/${locale}/login`;
+        }, 2000);
+        return;
+      }
+      
+      console.log('Session is valid, submitting report...');
+      
+      const { data: insertData, error: insertError } = await supabase
         .from('reports')
         .insert({
           trainee_id: traineeId,
@@ -79,18 +102,58 @@ export default function NewReportForm({ traineeId, locale }: NewReportFormProps)
           productivity_level: formData.productivity_level,
           report_date: formData.report_date,
           status: 'pending',
-        });
+        })
+        .select();
 
-      if (insertError) throw insertError;
+      if (insertError) {
+        console.error('Insert error:', insertError);
+        
+        // Check if it's an auth error
+        if (isAuthError(insertError)) {
+          console.error('Auth error detected in insert');
+          setError(locale === 'ar' 
+            ? 'انتهت صلاحية الجلسة. سيتم تحويلك إلى صفحة تسجيل الدخول...' 
+            : 'Session expired. Redirecting to login...');
+          
+          localStorage.setItem('draft_report', JSON.stringify(formData));
+          localStorage.setItem('return_url', window.location.pathname);
+          
+          setTimeout(() => {
+            window.location.href = `/${locale}/login`;
+          }, 2000);
+          return;
+        }
+        throw insertError;
+      }
 
+      console.log('Report submitted successfully:', insertData);
+      
       // Clear draft
       localStorage.removeItem('draft_report');
+      localStorage.removeItem('return_url');
 
       // Redirect back to reports list
       router.push(`/${locale}/trainee/my-reports`);
       router.refresh();
     } catch (err: any) {
-      setError(err.message || 'فشل في إضافة التقرير');
+      console.error('Error submitting report:', err);
+      
+      // Check if it's an auth error even in catch
+      if (isAuthError(err)) {
+        setError(locale === 'ar' 
+          ? 'انتهت صلاحية الجلسة. سيتم تحويلك إلى صفحة تسجيل الدخول...' 
+          : 'Session expired. Redirecting to login...');
+        
+        localStorage.setItem('draft_report', JSON.stringify(formData));
+        localStorage.setItem('return_url', window.location.pathname);
+        
+        setTimeout(() => {
+          window.location.href = `/${locale}/login`;
+        }, 2000);
+        return;
+      }
+      
+      setError(err.message || (locale === 'ar' ? 'فشل في إضافة التقرير' : 'Failed to add report'));
     } finally {
       setLoading(false);
     }
